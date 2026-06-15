@@ -4,6 +4,8 @@ Privacy-first market scanner, signal dashboard, and AI analysis workstation buil
 
 STRIKEPULSE is a prototype trading workstation for options traders. It ranks setups, checks option contract quality, plans entries/stops, tracks premium risk, manages alerts, and supports AI-style review without promising outcomes.
 
+STRIKEPULSE is an AI-powered market intelligence platform built for active traders who want faster insights, cleaner charts, and higher-probability setups. The platform combines technical analysis, market data, news catalysts, and custom trading signals into one streamlined workspace.
+
 ## Current STRIKEPULSE Status Checkpoint
 
 This checkpoint documents the current local prototype state for a GitHub-safe progress save. It does not enable cloud sync, broker connectivity, trade execution, or Phase 2 behavior.
