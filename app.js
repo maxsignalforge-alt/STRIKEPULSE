@@ -91,6 +91,11 @@ import { symbols, marketContext } from './data.js';
     if (!Array.isArray(signalMemory)) signalMemory = [];
     let signalLedger = readStoredJson("strikepulseSignalLedger", []);
     if (!Array.isArray(signalLedger)) signalLedger = [];
+    let activeSignalContext = readStoredJson("strikepulseActiveSignalContext", null);
+    if (!activeSignalContext || typeof activeSignalContext !== "object") activeSignalContext = null;
+    let signalStoryTimelines = readStoredJson("strikepulseSignalStoryTimelines", {});
+    if (!signalStoryTimelines || typeof signalStoryTimelines !== "object" || Array.isArray(signalStoryTimelines)) signalStoryTimelines = {};
+    let tomorrowMissionSignalId = localStorage.getItem("strikepulseTomorrowMissionSignalId") || "";
     let feedbackEntries = readStoredJson("strikepulseFeedback", []);
     if (!Array.isArray(feedbackEntries)) feedbackEntries = [];
     let practiceAccount = readStoredJson("strikepulsePracticeAccount", null) || {
@@ -172,11 +177,9 @@ import { symbols, marketContext } from './data.js';
       { id: "ticker", label: "Pick a ticker", detail: "Search or tap a ticker so STRIKEPULSE can load the live signal.", target: "search", next: "Choose a symbol from the ticker strip or search box." },
       { id: "daily", label: "Read Command Center", detail: "Start with best opportunity, biggest risk, proof lesson, and next action.", target: "dailyCommandCenter", next: "Open the Daily Command Center and inspect the top setup." },
       { id: "ticket", label: "Open Signal Ticket", detail: "Use the Quality Gate, rejection logic, Eagle Score, and Lightning readout.", target: "qualityGate", next: "Review the Signal Ticket before making any paper decision." },
-      { id: "screenshot", label: "Run Chart Intelligence", detail: "Upload or tag a chart screenshot so Eagle Scout can compare what you see.", target: "screenshotSignalCheck", next: "Run Chart Intelligence before trusting a visual setup." },
-      { id: "paper", label: "Paper or reject", detail: "Practice with demo money, or reject the setup when blockers are present.", target: "paperTradeSignal", next: "Paper trade only if the setup clears your rules." },
+      { id: "paper", label: "Demo paper decision", detail: "Use fake demo money, or reject/wait when blockers are present.", target: "paperTradeSignal", next: "Use demo money only if the setup clears your rules." },
       { id: "journal", label: "Journal the decision", detail: "Save why you confirmed, waited, skipped, or rejected the setup.", target: "journalNote", next: "Journal the decision so Proof Engine can learn from it." },
-      { id: "replay", label: "Replay an example", detail: "Review candle-by-candle proof after signals, journals, or paper outcomes exist.", target: "signalReplaySelect", next: "Replay a saved signal to study the setup." },
-      { id: "feedback", label: "Submit feedback", detail: "Capture beta friction while the experience is still fresh.", target: "feedbackMessage", next: "Log one local feedback note to sharpen the next build." }
+      { id: "replay", label: "Replay the lesson", detail: "Review candle-by-candle proof after a journal or demo outcome exists.", target: "signalReplaySelect", next: "Replay the saved signal, then let Trade DNA store the lesson." }
     ];
 
     function money(value) { return "$" + value.toFixed(2); }
@@ -901,12 +904,12 @@ import { symbols, marketContext } from './data.js';
       score.textContent = `${completed}/${startFlowSteps.length}`;
       score.className = `rounded-full border bg-zinc-950/70 px-3 py-1 text-xs font-black ${completed === startFlowSteps.length ? "border-emerald-300/30 text-emerald-100" : "border-sky-300/30 text-sky-100"}`;
       summary.textContent = completed === startFlowSteps.length
-        ? "First value loop complete: STRIKEPULSE produced a decision, captured proof, and collected feedback."
+        ? "First Signal Story complete: STRIKEPULSE produced a decision, captured proof, and created a lesson for tomorrow."
         : `Complete ${startFlowSteps.length - completed} more step${startFlowSteps.length - completed === 1 ? "" : "s"} to finish the first value loop.`;
       if (nextStep && nextButton) {
-        nextStep.textContent = next ? `Next: ${next.next}` : "First value loop complete. Keep building proof with paper trades, journals, and replays.";
-        nextButton.textContent = next ? `Go: ${next.label}` : "Review Dashboard";
-        nextButton.dataset.startFlowTarget = next?.target || "eliteDashboardSummary";
+        nextStep.textContent = next ? `Next: ${next.next}` : "First Signal Story complete. Tomorrow Mission can now use the lesson.";
+        nextButton.textContent = next ? `Go: ${next.label}` : "Review Mission";
+        nextButton.dataset.startFlowTarget = next?.target || "dailyCommandCenter";
       }
       list.innerHTML = startFlowSteps.map((step, index) => {
         const done = Boolean(startFlowProgress[step.id]);
@@ -934,27 +937,27 @@ import { symbols, marketContext } from './data.js';
       if (pilot?.status === "Grounded") return {
         verdict: "Replay First",
         tone: "indigo",
-        action: "Pilot Status is grounded. Study one replay and journal the lesson before any new paper risk."
+        action: "Pause new demo trades. Replay one saved story, then journal the lesson."
       };
       if (rejection?.verdict === "REJECT" || lightning?.outProbability >= 66) return {
         verdict: "Reject",
         tone: "rose",
-        action: rejection?.mainReason || "Strike Out risk is elevated. Protect demo capital and study the warning."
+        action: rejection?.mainReason || "Risk is too high. Journal the rejection as a completed decision."
       };
       if ((replays?.length || 0) && (!proof?.closed || proof.closed < 5)) return {
         verdict: "Replay First",
         tone: "indigo",
-        action: "Build trust before aggression: replay one saved setup, then journal what would confirm or invalidate it."
+        action: "Replay one saved Signal Story before taking new demo risk."
       };
       if (gate?.verdict === "A+ SETUP" && rejection?.verdict === "APPROVED" && lightning?.inProbability >= 68) return {
         verdict: "Confirm",
         tone: "emerald",
-        action: "Confirm the trigger, keep it paper-only, size the demo risk, then journal the decision."
+        action: "Confirm the trigger, use demo money only, then journal the decision."
       };
       return {
         verdict: "Wait",
         tone: "amber",
-        action: "The setup is not clean enough yet. Watch the chart, run Chart Intelligence, or study Replay."
+        action: "The setup is not clean yet. Journal the wait decision or replay a similar story."
       };
     }
 
@@ -967,6 +970,109 @@ import { symbols, marketContext } from './data.js';
         cyan: "border-cyan-300/30 bg-cyan-300/10 text-cyan-100"
       };
       return tones[tone] || tones.cyan;
+    }
+
+    function signalStoryStatusReadout() {
+      if (!activeSignalContext?.signalId) {
+        return {
+          signalId: "No Signal Story",
+          status: "Not Started",
+          next: "Open Mission Briefing to begin: review one setup, decide, journal, replay.",
+          tone: "cyan"
+        };
+      }
+      const story = reconstructSignalStoryTimeline(activeSignalContext.signalId);
+      const action = activeSignalContext.suggestedAction || "Wait";
+      if (story?.tomorrowMissionLesson || story?.tradeDnaLesson) {
+        return {
+          signalId: activeSignalContext.signalId,
+          status: "Ready for Tomorrow",
+          next: "Tomorrow Mission will use this exact lesson.",
+          tone: "emerald"
+        };
+      }
+      if (story?.replayGenerated) {
+        return {
+          signalId: activeSignalContext.signalId,
+          status: "Replay Reviewed",
+          next: "Open Trade DNA to confirm what STRIKEPULSE learned.",
+          tone: "indigo"
+        };
+      }
+      if (story?.journalSaved) {
+        return {
+          signalId: activeSignalContext.signalId,
+          status: "Journal Saved",
+          next: "Replay this exact Signal ID to see what happened next.",
+          tone: "cyan"
+        };
+      }
+      if (story?.paperTradeOpened) {
+        return {
+          signalId: activeSignalContext.signalId,
+          status: "Demo Paper Trade Attached",
+          next: "Close or journal the demo decision so STRIKEPULSE can learn.",
+          tone: "amber"
+        };
+      }
+      if (story?.eagleViewed) {
+        const next = action === "Confirm"
+          ? "Use demo money or journal the plan."
+          : action === "Reject"
+            ? "Journal the rejection. Skipping a bad setup is a completed decision."
+            : action === "Replay"
+              ? "Replay this exact Signal ID before any demo risk."
+              : "Journal the wait decision. Waiting is a completed decision.";
+        return {
+          signalId: activeSignalContext.signalId,
+          status: "Eagle Scout Reviewed",
+          next,
+          tone: action === "Confirm" ? "emerald" : action === "Reject" ? "rose" : action === "Replay" ? "indigo" : "amber"
+        };
+      }
+      if (story?.missionViewed) {
+        return {
+          signalId: activeSignalContext.signalId,
+          status: "Mission Briefed",
+          next: "Open Eagle Scout to choose Confirm, Wait, Reject, or Replay First.",
+          tone: "cyan"
+        };
+      }
+      return {
+        signalId: activeSignalContext.signalId,
+        status: "Signal Story Loaded",
+        next: "Continue from Mission Briefing or Eagle Scout.",
+        tone: "cyan"
+      };
+    }
+
+    function signalStoryStatusClass(tone) {
+      const classes = {
+        emerald: "text-emerald-100",
+        rose: "text-rose-100",
+        amber: "text-amber-100",
+        indigo: "text-indigo-100",
+        cyan: "text-cyan-100"
+      };
+      return classes[tone] || classes.cyan;
+    }
+
+    function renderSignalStoryStatus() {
+      const readout = signalStoryStatusReadout();
+      const text = `Signal Story: ${readout.signalId} · ${readout.status}. Next: ${readout.next}`;
+      [
+        "operatingLoopStoryStatus",
+        "eagleScoutStoryStatus",
+        "journalStoryStatus",
+        "signalReplayStoryStatus",
+        "tradeDnaStoryStatus"
+      ].forEach(id => {
+        const node = document.getElementById(id);
+        if (!node) return;
+        node.textContent = text;
+        node.className = `mt-2 text-xs font-bold leading-relaxed ${signalStoryStatusClass(readout.tone)}`;
+      });
+      return readout;
     }
 
     function renderOperatingLoop(payload = {}) {
@@ -994,8 +1100,8 @@ import { symbols, marketContext } from './data.js';
       const loopSteps = [
         { label: "Mission", value: `${payload.weather?.label || getMarketWeather(currentSymbol).label} weather`, target: "dailyCommandCenter", active: true },
         { label: "Eagle Scout", value: `${gate.verdict} · ${lightning.verdict.replace("⚡ ", "")}`, target: "eagleScoutExplainPanel", active: ["Confirm", "Wait"].includes(readout.verdict) },
-        { label: "Decision", value: readout.verdict, target: readout.verdict === "Reject" ? "tradeRejectionEngine" : "paperTradeSignal", active: true },
-        { label: "Learn", value: readout.verdict === "Replay First" ? "Replay now" : "Journal + replay", target: readout.verdict === "Replay First" ? "signalReplaySelect" : "journalNote", active: true }
+        { label: "Decision", value: readout.verdict, target: readout.verdict === "Reject" ? "journalNote" : "paperTradeSignal", active: true },
+        { label: "Learn", value: readout.verdict === "Replay First" ? "Replay now" : "Journal, then replay", target: readout.verdict === "Replay First" ? "signalReplaySelect" : "journalNote", active: true }
       ];
       steps.innerHTML = loopSteps.map((step, index) => `
         <button data-operating-loop-target="${step.target}" class="rounded-lg border ${step.active ? operatingLoopTone(readout.tone) : "border-zinc-800 bg-zinc-950/70 text-zinc-400"} p-3 text-left hover:border-cyan-300/50" type="button">
@@ -1006,6 +1112,7 @@ import { symbols, marketContext } from './data.js';
       steps.querySelectorAll("[data-operating-loop-target]").forEach(button => {
         button.addEventListener("click", () => startFlowJump(button.dataset.operatingLoopTarget));
       });
+      renderSignalStoryStatus();
     }
 
     function readinessItem(label, status, detail, tone = "ready") {
@@ -2049,6 +2156,20 @@ import { symbols, marketContext } from './data.js';
       setText("eagleScoutActionChip", `Action: ${explanation.suggestedAction}`);
       setText("eagleScoutRiskChip", `Risk: ${explanation.riskLevel}`);
       setText("eagleScoutMemoryChip", `Memory: ${explanation.memorySummary}`);
+      updateActiveSignalContext({
+        symbol: explanation.symbol || currentSymbol,
+        signalId: currentSignalReference(explanation.symbol || currentSymbol),
+        source: "eagle-scout-explanation",
+        eagleScore: explanation.confidence,
+        suggestedAction: explanation.suggestedAction,
+        activeBlockers: explanation.failed,
+        learning: {
+          eagleScoutRisk: explanation.riskLevel,
+          eagleScoutWhy: explanation.why,
+          markerType: explanation.markerType
+        }
+      }, "eagleScout");
+      renderSignalStoryStatus();
 
       const riskLevel = document.getElementById("eagleScoutRiskLevel");
       const riskChip = document.getElementById("eagleScoutRiskChip");
@@ -2092,11 +2213,11 @@ import { symbols, marketContext } from './data.js';
           eagleScoutExampleLine("Candle-by-candle ready", "Use Replay Mode to step through Eagle Score changes, Lightning appearances, and the final outcome.", "cyan"),
           ...explanation.examples.replay.slice(0, 2).map(item => eagleScoutExampleLine(item.symbol || explanation.symbol, item.replayLabel || item.predictedOutcome || "Replay available", "cyan"))
         ].join("")
-        : eagleScoutExampleLine("No replay examples yet", "Save signal memory or close a paper trade to unlock candle-by-candle review.", "zinc");
+          : eagleScoutExampleLine("No replay examples yet", "Use demo money or journal a skipped decision to unlock the first replay lesson.", "zinc");
       if (journal) {
         const screenshotLine = screenshotPreviewUrl
-          ? eagleScoutExampleLine("Screenshot loaded", "A local chart screenshot is available for Screenshot Signal Check comparison.", "cyan")
-          : eagleScoutExampleLine("No screenshot loaded", "Upload or paste a chart screenshot to compare visible context against this signal.", "zinc");
+          ? eagleScoutExampleLine("Optional screenshot loaded", "A local chart screenshot can be compared later.", "cyan")
+          : eagleScoutExampleLine("Optional screenshot", "You can skip screenshots for the first Signal Story.", "zinc");
         const journalLines = explanation.examples.journal.length
           ? explanation.examples.journal.slice(0, 2).map(item => eagleScoutExampleLine(`${item.symbol || explanation.symbol} ${item.outcome || "Journal"}`, item.note || item.contract || "Local journal note", "amber")).join("")
           : eagleScoutExampleLine("No journal examples yet", "Journal a decision to make this explanation personal.", "zinc");
@@ -2127,11 +2248,16 @@ import { symbols, marketContext } from './data.js';
       const items = renderSignalReplayOptions();
       const select = document.getElementById("signalReplaySelect");
       const symbol = activeChartSymbol();
-      const match = items.find(item => item.symbol === symbol);
-      if (match && select) select.value = match.replayId;
+      const context = ensureSignalContext(symbol, "eagleScout");
+      const match = context?.signalId ? items.find(item => item.signalId === context.signalId) : null;
+      if (!match || !select) {
+        showNeutralToast(context?.signalId ? `No exact replay yet for ${context.signalId}` : "No active Signal Story replay found");
+        return;
+      }
+      select.value = match.replayId;
       renderSignalReplay({ activateChart: true });
       eagleScoutJumpTo("signalReplaySelect", "replay");
-      showNeutralToast(match ? `${symbol} replay loaded` : "Replay panel opened");
+      showNeutralToast(`${context.signalId} replay loaded`);
     }
 
     function openEagleScoutScreenshotCheck() {
@@ -2164,6 +2290,7 @@ import { symbols, marketContext } from './data.js';
       const outcome = document.getElementById("journalOutcome");
       const explanation = buildEagleScoutExplanation(activeEagleScoutMarker);
       const plan = eagleScoutActionPlan(explanation);
+      ensureSignalContext(explanation?.symbol || currentSymbol, "eagleScout");
       if (outcome) outcome.value = plan.journalOutcome;
       if (note && !note.value.trim()) {
         note.value = plan.journalNote;
@@ -3293,6 +3420,11 @@ import { symbols, marketContext } from './data.js';
         userVerdict: "Paper trade opened",
         outcome: { status: "Open", source: "local-paper" }
       });
+      linkActiveSignalContext("paper", position.id, {
+        stage: "paperTrade",
+        userVerdict: "Paper trade opened",
+        outcome: { status: "Open", source: "local-paper" }
+      });
       trimPracticeHistory();
       savePracticeAccount();
       queueCloudSync("paper-buy");
@@ -3407,6 +3539,23 @@ import { symbols, marketContext } from './data.js';
         userVerdict: "Paper trade opened",
         outcome: { status: "Open", source: "local-paper" }
       });
+      updateActiveSignalContext({
+        signalId: snapshot.signalId,
+        symbol: snapshot.symbol,
+        source: "paper-trade",
+        eagleScore: snapshot.score,
+        suggestedAction: snapshot.verdict,
+        marketRegime: snapshot.marketRegime,
+        learning: {
+          optionTicker: snapshot.optionTicker,
+          contract: snapshot.contract,
+          predictedOutcome: snapshot.predictedOutcome
+        }
+      }, "paperTrade");
+      linkActiveSignalContext("paper", position.id, {
+        userVerdict: "Paper trade opened",
+        outcome: { status: "Open", source: "local-paper" }
+      });
       trimPracticeHistory();
       savePracticeAccount();
       queueCloudSync("paper-signal-buy");
@@ -3499,6 +3648,24 @@ import { symbols, marketContext } from './data.js';
             source: "local-paper"
           }
         });
+        if (activeSignalContext?.signalId === closeTrade.signalId) {
+          linkActiveSignalContext("paper", closeId, {
+            outcome: {
+              status: "Closed",
+              paperTradeOutcome: pnl > 0 ? "Win" : pnl < 0 ? "Loss" : "Breakeven",
+              winLoss: pnl > 0 ? "Win" : pnl < 0 ? "Loss" : "Breakeven",
+              percentMove: Number(percentMove.toFixed(2)),
+              maxFavorableExcursion: Number(Math.max(0, percentMove).toFixed(2)),
+              maxAdverseExcursion: Number(Math.min(0, percentMove).toFixed(2)),
+              source: "local-paper"
+            },
+            learning: {
+              closeGrade: grade.grade,
+              processScore: grade.score,
+              issues: grade.issues
+            }
+          });
+        }
         closedTrades.push(closeTrade);
       });
       practiceAccount.positions = practiceAccount.positions.filter(position => position.symbol !== currentSymbol);
@@ -3797,7 +3964,7 @@ import { symbols, marketContext } from './data.js';
       const paperButton = document.getElementById("paperTradeSignal");
       if (!paperButton) return;
       paperButton.disabled = Boolean(rejection?.rejected);
-      paperButton.textContent = rejection?.rejected ? "Rejected" : "Paper Trade";
+      paperButton.textContent = rejection?.rejected ? "Rejected" : "Demo Paper Trade";
       paperButton.className = rejection?.rejected
         ? "cursor-not-allowed rounded-lg border border-rose-300/30 bg-rose-300/10 px-3 py-2 text-xs font-black text-rose-100 opacity-80"
         : "rounded-lg bg-emerald-400 px-3 py-2 text-xs font-black text-zinc-950 hover:bg-emerald-300";
@@ -4482,6 +4649,22 @@ import { symbols, marketContext } from './data.js';
         ? `${pilot.unjournaledToday} paper outcome still needs a journal note. Capture entry reason, invalidation, emotion, and lesson before the next decision.`
         : `${pilot.status}: ${pilot.recommendations[0]}`
       );
+      if (activeSignalContext?.signalId) {
+        updateActiveSignalContext({
+          signalId: activeSignalContext.signalId,
+          symbol: activeSignalContext.symbol || currentSymbol,
+          source: "pilot-status",
+          learning: {
+            pilotStatus: pilot.status,
+            pilotReadinessScore: pilot.readinessScore,
+            pilotDiscipline: pilot.discipline,
+            pilotPatience: pilot.patience,
+            pilotRuleAdherence: pilot.ruleAdherence,
+            pilotBlockers: pilot.blockers,
+            pilotRecommendation: pilot.recommendations[0]
+          }
+        }, "pilotStatus");
+      }
       return pilot;
     }
 
@@ -4580,6 +4763,18 @@ import { symbols, marketContext } from './data.js';
 
     function renderLightningTicket(lightning) {
       const result = lightning || evaluateLightningStrike(symbols[currentSymbol], getQualityGate(symbols[currentSymbol]), evaluateTradeRejection(symbols[currentSymbol]), currentSymbol);
+      if (canReuseActiveSignalContext(currentSymbol)) {
+        updateActiveSignalContext({
+          signalId: activeSignalContext.signalId,
+          symbol: currentSymbol,
+          source: "lightning-strike",
+          lightning: result,
+          learning: {
+            lightningStatus: result.verdict,
+            lightningSummary: result.summary
+          }
+        }, "lightningStrike");
+      }
       const armedIn = result.verdict.includes("Strike In");
       const armedOut = result.verdict.includes("Strike Out");
       const brewing = result.verdict.includes("Brewing");
@@ -4862,10 +5057,11 @@ import { symbols, marketContext } from './data.js';
     }
 
     function buildChartIntelligenceSignalContext(symbol, data, gate) {
+      const activeContext = ensureSignalContext(symbol, "chartIntelligence");
       const rejection = evaluateTradeRejection(data, gate, symbol);
       const lightning = evaluateLightningStrike(data, gate, rejection, symbol);
       return {
-        signalId: latestSignalIdForSymbol(symbol),
+        signalId: activeContext?.signalId || latestSignalIdForSymbol(symbol),
         symbol,
         timeframe: document.getElementById("screenshotTimeframe")?.value || activeRange,
         direction: data.type,
@@ -5014,6 +5210,24 @@ import { symbols, marketContext } from './data.js';
       renderScreenshotPills("screenshotMissing", analysis.missing, "No unclear factors", "missing");
       document.getElementById("chartIntelWinners").innerHTML = analysis.examples.winners.map(item => chartIntelExampleLine(item.title, item.detail, "cyan")).join("");
       document.getElementById("chartIntelFailures").innerHTML = analysis.examples.failures.map(item => chartIntelExampleLine(item.title, item.detail, "rose")).join("");
+      updateActiveSignalContext({
+        signalId: analysis.signalContext.signalId,
+        symbol: analysis.signalContext.symbol,
+        source: "chart-intelligence",
+        suggestedAction: analysis.suggestedAction,
+        eagleScore: analysis.score,
+        qualityGate: analysis.signalContext.gate,
+        tradeRejection: analysis.signalContext.rejection,
+        lightning: analysis.signalContext.lightning,
+        learning: {
+          chartIntelPattern: analysis.detectedPattern,
+          chartIntelRisk: analysis.riskLevel,
+          chartIntelStrikeProbability: analysis.strikeProbability,
+          chartIntelResult: analysis.result,
+          chartIntelVisibleFactors: analysis.visibleCount,
+          chartIntelConflicts: analysis.conflicts.map(item => item.label)
+        }
+      }, "chartIntelligence");
       activeEagleScoutMarker = analysis.suggestedAction === "Reject" ? "reject" : analysis.suggestedAction === "Replay First" ? "replay" : "live";
       renderEagleScoutExplanation(activeEagleScoutMarker);
       showNeutralToast(`Screenshot check: ${analysis.result}`);
@@ -5182,15 +5396,15 @@ import { symbols, marketContext } from './data.js';
 
       return {
         ...plan,
-        primaryLabel: "Wait / Compare",
-        primaryIcon: "fa-image",
-        primaryTone: "cyan",
-        primaryAction: "screenshot",
+        primaryLabel: "Journal Wait",
+        primaryIcon: "fa-book-open",
+        primaryTone: "amber",
+        primaryAction: "journal",
         journalLabel: "Journal Watch",
-        journalOutcome: "Planned",
+        journalOutcome: "Skipped",
         journalToast: "Watchlist journal prefilled from Eagle Scout",
         journalNote: `${explanation.title}: Wait. ${explanation.why} Recheck after cleaner confirmation.`,
-        journalTags: ["Eagle Scout", "Wait", "Watchlist"]
+        journalTags: ["Eagle Scout", "Wait", "Skipped", "Watchlist"]
       };
     }
 
@@ -5203,7 +5417,8 @@ import { symbols, marketContext } from './data.js';
         emerald: "border-emerald-300/35 bg-emerald-300/10 text-emerald-100 hover:bg-emerald-300/20",
         rose: "border-rose-300/35 bg-rose-300/10 text-rose-100 hover:bg-rose-300/20",
         indigo: "border-indigo-300/35 bg-indigo-300/10 text-indigo-100 hover:bg-indigo-300/20",
-        cyan: "border-cyan-300/35 bg-cyan-300/10 text-cyan-100 hover:bg-cyan-300/20"
+        cyan: "border-cyan-300/35 bg-cyan-300/10 text-cyan-100 hover:bg-cyan-300/20",
+        amber: "border-amber-300/35 bg-amber-300/10 text-amber-100 hover:bg-amber-300/20"
       };
       if (primary) {
         primary.dataset.action = plan.primaryAction;
@@ -5243,8 +5458,62 @@ import { symbols, marketContext } from './data.js';
       return `${prefix}${String(next).padStart(4, "0")}`;
     }
 
+    function signalContextDateKey(context = {}) {
+      return signalDateKey(context.createdAt || context.timestamp || new Date());
+    }
+
+    function signalSetupSignature(snapshot = {}) {
+      const gate = snapshot.qualityGate?.verdict || snapshot.gate?.verdict || snapshot.systemVerdict || "--";
+      const rejection = snapshot.tradeRejection?.verdict || snapshot.rejection?.verdict || "--";
+      const lightning = snapshot.lightning?.verdict || snapshot.lightningStatus || "--";
+      const timeframe = snapshot.timeframe || activeRange || "--";
+      return `${timeframe}|${gate}|${rejection}|${lightning}`;
+    }
+
+    function sameSignalDay(left = {}, right = {}) {
+      return signalContextDateKey(left) === signalContextDateKey(right);
+    }
+
+    function sameSetupSignature(left = {}, right = {}) {
+      const leftSignature = left.setupSignature || signalSetupSignature(left);
+      const rightSignature = right.setupSignature || signalSetupSignature(right);
+      return leftSignature === rightSignature;
+    }
+
+    function canReuseActiveSignalContext(symbol = currentSymbol, snapshot = null) {
+      if (!activeSignalContext?.signalId || activeSignalContext.symbol !== symbol) return false;
+      if (!sameSignalDay(activeSignalContext, snapshot || { timestamp: new Date() })) return false;
+      if (!snapshot) return true;
+      return sameSetupSignature(activeSignalContext, snapshot);
+    }
+
+    function latestReusableSignalSnapshot(symbol = currentSymbol, snapshot = null) {
+      return signalMemory.find(item => {
+        if (item.symbol !== symbol) return false;
+        if (!sameSignalDay(item, snapshot || { timestamp: new Date() })) return false;
+        return snapshot ? sameSetupSignature(item, snapshot) : true;
+      });
+    }
+
+    function latestReusableSignalRecord(symbol = currentSymbol, snapshot = null) {
+      return signalLedger.find(item => {
+        if (item.symbol !== symbol) return false;
+        if (!sameSignalDay(item, snapshot || { timestamp: new Date() })) return false;
+        return snapshot ? sameSetupSignature(item, snapshot) : true;
+      });
+    }
+
     function saveSignalLedger() {
       localStorage.setItem("strikepulseSignalLedger", JSON.stringify(signalLedger.slice(0, 500)));
+    }
+
+    function saveTomorrowMissionSignalId(signalId) {
+      tomorrowMissionSignalId = signalId || "";
+      if (tomorrowMissionSignalId) {
+        localStorage.setItem("strikepulseTomorrowMissionSignalId", tomorrowMissionSignalId);
+      } else {
+        localStorage.removeItem("strikepulseTomorrowMissionSignalId");
+      }
     }
 
     function confidenceBandFor(score) {
@@ -5277,6 +5546,7 @@ import { symbols, marketContext } from './data.js';
         lightningInProbability: snapshot.lightning?.strikeInProbability ?? null,
         lightningOutProbability: snapshot.lightning?.strikeOutProbability ?? null,
         systemVerdict: snapshot.qualityGate?.verdict || snapshot.tradeRejection?.verdict || "WAIT",
+        setupSignature: snapshot.setupSignature || signalSetupSignature(snapshot),
         userVerdict: snapshot.suggestedAction || "Wait",
         marketWeather: snapshot.marketWeather?.label || "--",
         marketRegime: snapshot.marketRegime || "--",
@@ -5322,12 +5592,19 @@ import { symbols, marketContext } from './data.js';
         signalLedger = [record, ...signalLedger].slice(0, 500);
       }
       saveSignalLedger();
+      updateSignalStoryTimeline(record.signalId, {
+        createdAt: record.createdAt,
+        graveyardStatus: record.graveyard?.buried ? "Buried" : "Clear"
+      });
       return record.signalId;
     }
 
     function currentSignalReference(symbol = currentSymbol) {
-      const latest = signalMemory.find(item => item.symbol === symbol);
+      if (canReuseActiveSignalContext(symbol)) return activeSignalContext.signalId;
+      const latest = latestReusableSignalSnapshot(symbol);
       if (latest?.signalId) return latest.signalId;
+      const record = latestReusableSignalRecord(symbol);
+      if (record?.signalId) return record.signalId;
       const snapshot = rememberSignalSnapshot(symbol, "proof-link");
       return snapshot?.signalId || null;
     }
@@ -5354,11 +5631,290 @@ import { symbols, marketContext } from './data.js';
         }
       };
       saveSignalLedger();
+      updateSignalStoryTimeline(signalId, {
+        paperTradeOpened: key === "linkedPaperTradeIds" ? new Date().toISOString() : undefined,
+        journalSaved: key === "linkedJournalIds" ? new Date().toISOString() : undefined,
+        replayGenerated: key === "linkedReplayIds" ? id : undefined,
+        graveyardStatus: signalLedger[index].graveyard?.buried ? "Buried" : "Clear"
+      });
+      if (activeSignalContext?.signalId === signalId) {
+        linkActiveSignalContext(type, id, patch);
+      }
     }
 
     function latestSignalIdForSymbol(symbol = currentSymbol) {
-      const latest = signalMemory.find(item => item.symbol === symbol);
-      return latest?.signalId || signalLedger.find(item => item.symbol === symbol)?.signalId || "LOCAL-PREVIEW";
+      const latest = latestReusableSignalSnapshot(symbol);
+      const today = signalDateKey(new Date());
+      const ledgerMatch = signalLedger.find(item => item.symbol === symbol && signalDateKey(item.createdAt || item.date || new Date()) === today);
+      return latest?.signalId || ledgerMatch?.signalId || "LOCAL-PREVIEW";
+    }
+
+    function saveActiveSignalContext() {
+      if (!activeSignalContext) {
+        localStorage.removeItem("strikepulseActiveSignalContext");
+        return;
+      }
+      localStorage.setItem("strikepulseActiveSignalContext", JSON.stringify(activeSignalContext));
+    }
+
+    function saveSignalStoryTimelines() {
+      localStorage.setItem("strikepulseSignalStoryTimelines", JSON.stringify(signalStoryTimelines));
+    }
+
+    function baseSignalStoryTimeline(signalId, createdAt = null) {
+      return {
+        signalId,
+        createdAt,
+        missionViewed: null,
+        eagleViewed: null,
+        paperTradeOpened: null,
+        journalSaved: null,
+        replayGenerated: null,
+        graveyardStatus: "Clear",
+        tradeDnaLesson: null,
+        tomorrowMissionLesson: null
+      };
+    }
+
+    function reconstructSignalStoryTimeline(signalId) {
+      if (!signalId) return null;
+      const existing = signalStoryTimelines[signalId] || {};
+      const ledger = signalLedger.find(item => item.signalId === signalId) || {};
+      const memory = signalMemory.find(item => item.signalId === signalId) || {};
+      const paperBuys = practiceAccount.history.filter(item => item.signalId === signalId && item.action === "BUY");
+      const paperCloses = practiceAccount.history.filter(item => item.signalId === signalId && item.action === "CLOSE");
+      const journals = journalEntries.filter(entry => entry.signalId === signalId);
+      const learning = activeSignalContext?.signalId === signalId ? (activeSignalContext.learning || {}) : {};
+      const firstPaper = paperBuys[paperBuys.length - 1] || paperBuys[0] || paperCloses[paperCloses.length - 1] || paperCloses[0];
+      const firstJournal = journals[journals.length - 1] || journals[0];
+      const replayId = existing.replayGenerated || ledger.linkedReplayIds?.[0] || learning.replayId || null;
+      const buried = ledger.graveyard?.buried || memory.tradeRejection?.verdict === "REJECT" || memory.qualityGate?.verdict === "REJECT";
+      return {
+        ...baseSignalStoryTimeline(signalId, ledger.createdAt || memory.timestamp || existing.createdAt || new Date().toISOString()),
+        ...existing,
+        signalId,
+        createdAt: existing.createdAt || ledger.createdAt || memory.timestamp || new Date().toISOString(),
+        paperTradeOpened: existing.paperTradeOpened || firstPaper?.openedAt || firstPaper?.time || null,
+        journalSaved: existing.journalSaved || firstJournal?.time || null,
+        replayGenerated: replayId,
+        graveyardStatus: buried ? "Buried" : existing.graveyardStatus || "Clear",
+        tradeDnaLesson: existing.tradeDnaLesson || learning.tradeDnaRecommendation || null,
+        tomorrowMissionLesson: existing.tomorrowMissionLesson || learning.pilotRecommendation || null
+      };
+    }
+
+    function updateSignalStoryTimeline(signalId, patch = {}) {
+      if (!signalId) return null;
+      const reconstructed = reconstructSignalStoryTimeline(signalId);
+      const safePatch = { ...patch };
+      Object.keys(safePatch).forEach(key => {
+        if (safePatch[key] === undefined) delete safePatch[key];
+      });
+      ["createdAt", "missionViewed", "eagleViewed", "paperTradeOpened", "journalSaved", "replayGenerated"].forEach(key => {
+        if (reconstructed?.[key] && safePatch[key]) delete safePatch[key];
+      });
+      const timeline = {
+        ...reconstructed,
+        ...safePatch,
+        signalId
+      };
+      signalStoryTimelines[signalId] = timeline;
+      saveSignalStoryTimelines();
+      if (signalStoryHasLesson(timeline) && (safePatch.tradeDnaLesson || safePatch.tomorrowMissionLesson)) {
+        saveTomorrowMissionSignalId(signalId);
+      }
+      return timeline;
+    }
+
+    function signalStoryTimeValue(value) {
+      const time = Date.parse(value || "");
+      return Number.isFinite(time) ? time : 0;
+    }
+
+    function signalStoryCompletionScore(story = {}) {
+      return [
+        story.signalId,
+        story.missionViewed,
+        story.eagleViewed,
+        story.paperTradeOpened,
+        story.journalSaved,
+        story.replayGenerated,
+        story.tradeDnaLesson,
+        story.tomorrowMissionLesson
+      ].filter(Boolean).length;
+    }
+
+    function signalStoryLatestTime(story = {}) {
+      return Math.max(
+        signalStoryTimeValue(story.createdAt),
+        signalStoryTimeValue(story.missionViewed),
+        signalStoryTimeValue(story.eagleViewed),
+        signalStoryTimeValue(story.paperTradeOpened),
+        signalStoryTimeValue(story.journalSaved),
+        signalStoryTimeValue(story.replayGenerated)
+      );
+    }
+
+    function signalStoryHasLesson(story = {}) {
+      return Boolean(story?.signalId && (story.tomorrowMissionLesson || story.tradeDnaLesson));
+    }
+
+    function latestCompletedSignalStory() {
+      const ids = new Set([
+        ...Object.keys(signalStoryTimelines || {}),
+        ...signalLedger.map(item => item.signalId).filter(Boolean),
+        ...signalMemory.map(item => item.signalId).filter(Boolean),
+        ...practiceAccount.history.map(item => item.signalId).filter(Boolean),
+        ...journalEntries.map(entry => entry.signalId).filter(Boolean)
+      ]);
+      return [...ids]
+        .map(id => reconstructSignalStoryTimeline(id))
+        .filter(story => story?.signalId && story.eagleViewed && (story.journalSaved || story.replayGenerated) && (story.tradeDnaLesson || story.tomorrowMissionLesson))
+        .sort((a, b) => signalStoryLatestTime(b) - signalStoryLatestTime(a) || signalStoryCompletionScore(b) - signalStoryCompletionScore(a))[0] || null;
+    }
+
+    function completedSignalStoryForMission() {
+      const storedStory = tomorrowMissionSignalId ? reconstructSignalStoryTimeline(tomorrowMissionSignalId) : null;
+      if (signalStoryHasLesson(storedStory)) return storedStory;
+      const activeStory = activeSignalContext?.signalId ? reconstructSignalStoryTimeline(activeSignalContext.signalId) : null;
+      if (signalStoryHasLesson(activeStory)) return activeStory;
+      return null;
+    }
+
+    function signalStoryMissionReadout(story) {
+      if (!story) return null;
+      const lesson = story.tomorrowMissionLesson || story.tradeDnaLesson;
+      if (!lesson) return null;
+      return {
+        headline: `${story.signalId} lesson`,
+        replay: story.replayGenerated
+          ? `${story.signalId}: replay reviewed. ${lesson}`
+          : `${story.signalId}: journal lesson ready. ${lesson}`,
+        focus: "Apply the last completed Signal Story",
+        detail: lesson,
+        dnaRule: `From ${story.signalId}: ${lesson}`
+      };
+    }
+
+    function signalStoryPatchForStage(context = {}, stage = "context") {
+      const now = new Date().toISOString();
+      const learning = context.learning || {};
+      if (stage === "mission") {
+        return { missionViewed: now };
+      }
+      if (stage === "eagleScout") return { eagleViewed: now };
+      if (stage === "lightningStrike") return {};
+      if (stage === "paper" || stage === "paperTrade") return { paperTradeOpened: now };
+      if (stage === "journal") return { journalSaved: now };
+      if (stage === "replay") return { replayGenerated: learning.replayId || now };
+      if (stage === "tradeDna") return { tradeDnaLesson: learning.tradeDnaRecommendation || null };
+      if (stage === "pilotStatus") return { tomorrowMissionLesson: learning.pilotRecommendation || null };
+      return {};
+    }
+
+    function signalContextFromSnapshot(snapshot = {}, stage = "memory") {
+      const symbol = snapshot.symbol || currentSymbol;
+      const data = symbols[symbol] || symbols[currentSymbol];
+      const reusableMemory = latestReusableSignalSnapshot(symbol, snapshot);
+      const reusableRecord = latestReusableSignalRecord(symbol, snapshot);
+      const signalId = snapshot.signalId
+        || (canReuseActiveSignalContext(symbol, snapshot) ? activeSignalContext.signalId : null)
+        || reusableMemory?.signalId
+        || reusableRecord?.signalId
+        || generateSignalId(symbol, snapshot.timestamp || new Date());
+      const ledger = signalLedger.find(item => item.signalId === signalId) || {};
+      return {
+        signalId,
+        symbol,
+        source: snapshot.source || stage,
+        stage,
+        timeframe: snapshot.timeframe || activeRange,
+        setupSignature: snapshot.setupSignature || signalSetupSignature(snapshot),
+        createdAt: snapshot.timestamp || ledger.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        price: Number(snapshot.price ?? data?.price) || 0,
+        eagleScore: Number(snapshot.eagleScore ?? snapshot.confidence ?? data?.confidence) || 0,
+        suggestedAction: snapshot.suggestedAction || ledger.userVerdict || "Wait",
+        qualityGate: snapshot.qualityGate || { verdict: ledger.systemVerdict || "WAIT", score: 0 },
+        tradeRejection: snapshot.tradeRejection || { verdict: ledger.systemVerdict || "WAIT", score: 0, mainReason: "No rejection read attached yet", blockers: [] },
+        lightning: snapshot.lightning || { verdict: ledger.lightningStatus || "Watching", strikeInProbability: ledger.lightningInProbability, strikeOutProbability: ledger.lightningOutProbability, factors: [] },
+        marketWeather: snapshot.marketWeather || { label: ledger.marketWeather || "--", score: null },
+        marketRegime: snapshot.marketRegime || ledger.marketRegime || "--",
+        activeBlockers: snapshot.activeBlockers || [],
+        links: {
+          journalIds: ledger.linkedJournalIds || [],
+          paperTradeIds: ledger.linkedPaperTradeIds || [],
+          replayIds: ledger.linkedReplayIds || []
+        },
+        outcome: ledger.outcome || snapshot.outcome || { status: "Open", source: "local-educational" },
+        learning: activeSignalContext?.signalId === signalId ? (activeSignalContext.learning || {}) : {}
+      };
+    }
+
+    function updateActiveSignalContext(snapshotOrPatch = {}, stage = "context") {
+      const patchSignalId = snapshotOrPatch.signalId;
+      const patchSymbol = snapshotOrPatch.symbol || activeSignalContext?.symbol || currentSymbol;
+      const sameActiveSignal = patchSignalId && activeSignalContext?.signalId === patchSignalId;
+      const hasSetupFields = Boolean(snapshotOrPatch.qualityGate || snapshotOrPatch.tradeRejection || snapshotOrPatch.lightning || snapshotOrPatch.setupSignature);
+      const canReuseActive = !patchSignalId && (
+        hasSetupFields
+          ? canReuseActiveSignalContext(patchSymbol, snapshotOrPatch)
+          : activeSignalContext?.symbol === patchSymbol && activeSignalContext?.signalId
+      );
+      const base = sameActiveSignal || canReuseActive
+        ? activeSignalContext
+        : snapshotOrPatch.signalId || snapshotOrPatch.symbol || snapshotOrPatch.qualityGate
+          ? signalContextFromSnapshot(snapshotOrPatch, stage)
+          : activeSignalContext;
+      if (!base) return null;
+      activeSignalContext = {
+        ...(activeSignalContext?.signalId === base.signalId ? activeSignalContext : {}),
+        ...base,
+        ...snapshotOrPatch,
+        stage,
+        setupSignature: snapshotOrPatch.setupSignature || base.setupSignature || signalSetupSignature({ ...base, ...snapshotOrPatch }),
+        updatedAt: new Date().toISOString(),
+        links: {
+          ...(base.links || {}),
+          ...(snapshotOrPatch.links || {})
+        },
+        learning: {
+          ...(base.learning || {}),
+          ...(snapshotOrPatch.learning || {})
+        }
+      };
+      saveActiveSignalContext();
+      updateSignalStoryTimeline(activeSignalContext.signalId, signalStoryPatchForStage(activeSignalContext, stage));
+      return activeSignalContext;
+    }
+
+    function ensureSignalContext(symbol = currentSymbol, stage = "context") {
+      if (canReuseActiveSignalContext(symbol)) {
+        activeSignalContext.stage = stage;
+        activeSignalContext.updatedAt = new Date().toISOString();
+        saveActiveSignalContext();
+        return activeSignalContext;
+      }
+      const latest = latestReusableSignalSnapshot(symbol);
+      if (latest?.signalId) return updateActiveSignalContext(latest, stage);
+      const snapshot = rememberSignalSnapshot(symbol, stage);
+      return snapshot ? updateActiveSignalContext(snapshot, stage) : null;
+    }
+
+    function linkActiveSignalContext(type, id, patch = {}) {
+      if (!activeSignalContext?.signalId) return null;
+      const key = type === "journal" ? "journalIds" : type === "paper" ? "paperTradeIds" : "replayIds";
+      const links = new Set(activeSignalContext.links?.[key] || []);
+      if (id) links.add(id);
+      return updateActiveSignalContext({
+        signalId: activeSignalContext.signalId,
+        symbol: activeSignalContext.symbol,
+        links: {
+          ...(activeSignalContext.links || {}),
+          [key]: [...links]
+        },
+        ...patch
+      }, type);
     }
 
     function demoContractFor(symbol) {
@@ -5759,15 +6315,30 @@ import { symbols, marketContext } from './data.js';
       const weather = getMarketWeather(symbol);
       const sectorRotation = buildSectorRotation(rankSetups());
       const sectorRead = sectorRotation.sectors.find(item => item.sector === data.sector);
+      const timestamp = new Date().toISOString();
+      const timeLabel = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+      const signalDraft = {
+        symbol,
+        timestamp,
+        timeframe: activeRange,
+        qualityGate: { verdict: gate.verdict },
+        tradeRejection: { verdict: rejection.verdict },
+        lightning: { verdict: lightning.verdict }
+      };
+      const reusableSnapshot = latestReusableSignalSnapshot(symbol, signalDraft);
+      const reusableRecord = latestReusableSignalRecord(symbol, signalDraft);
       return {
         id: `${Date.now()}-${symbol}-${source}`,
-        signalId: generateSignalId(symbol),
+        signalId: canReuseActiveSignalContext(symbol, signalDraft)
+          ? activeSignalContext.signalId
+          : reusableSnapshot?.signalId || reusableRecord?.signalId || generateSignalId(symbol),
         source,
         symbol,
-        timestamp: new Date().toISOString(),
-        timeLabel: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
+        timestamp,
+        timeLabel,
         price: Number(data.price.toFixed(2)),
         timeframe: activeRange,
+        setupSignature: signalSetupSignature(signalDraft),
         marketWeather: {
           label: weather.label,
           score: weather.score,
@@ -5815,6 +6386,21 @@ import { symbols, marketContext } from './data.js';
     function rememberSignalSnapshot(symbol = currentSymbol, source = "scan") {
       const snapshot = buildSignalSnapshot(symbol, source);
       if (!snapshot) return null;
+      const reusable = latestReusableSignalSnapshot(symbol, snapshot);
+      if (reusable?.signalId) {
+        const merged = {
+          ...reusable,
+          ...snapshot,
+          id: reusable.id || snapshot.id,
+          signalId: reusable.signalId,
+          timestamp: reusable.timestamp || snapshot.timestamp
+        };
+        signalMemory = [merged, ...signalMemory.filter(item => item.id !== reusable.id)].slice(0, 250);
+        upsertSignalLedger(merged);
+        saveSignalMemory();
+        updateActiveSignalContext(merged, source);
+        return merged;
+      }
       const last = signalMemory[0];
       const duplicate = last &&
         last.symbol === snapshot.symbol &&
@@ -5828,11 +6414,13 @@ import { symbols, marketContext } from './data.js';
           last.signalId = upsertSignalLedger(last);
           saveSignalMemory();
         }
+        updateActiveSignalContext(last, source);
         return last;
       }
       upsertSignalLedger(snapshot);
       signalMemory = [snapshot, ...signalMemory].slice(0, 250);
       saveSignalMemory();
+      updateActiveSignalContext(snapshot, source);
       renderSignalGraveyard();
       renderTradeDna();
       renderProofEngine();
@@ -6345,6 +6933,18 @@ import { symbols, marketContext } from './data.js';
     }
 
     function renderDailyMission(payload) {
+      updateActiveSignalContext({
+        symbol: payload.symbol || currentSymbol,
+        signalId: currentSignalReference(payload.symbol || currentSymbol),
+        source: "mission-briefing",
+        eagleScore: payload.score,
+        suggestedAction: payload.action,
+        qualityGate: payload.gate,
+        tradeRejection: payload.rejection,
+        lightning: payload.lightning,
+        marketWeather: payload.weather,
+        marketRegime: payload.weather?.regime
+      }, "mission");
       const ranked = rankSetups().sort((a, b) => b.opportunityScore - a.opportunityScore);
       const lightningOps = missionLightningOpportunities(ranked);
       const dangerSignals = missionDangerSignals(ranked);
@@ -6362,6 +6962,8 @@ import { symbols, marketContext } from './data.js';
       const topReplay = replays[0];
       const focus = missionDailyFocus(status, confidence, proof, graveyard.length, dna);
       const dnaReadout = missionEagleDnaReadout(dna);
+      const completedStory = completedSignalStoryForMission();
+      const storyReadout = signalStoryMissionReadout(completedStory);
       const primaryAction = missionPrimaryActionReadout(status, payload, confidence);
       const topRisk = missionTopRiskReadout(payload, graveyardLesson, dangerSignals);
       const proofPulse = missionProofPulseReadout(proof);
@@ -6387,13 +6989,13 @@ import { symbols, marketContext } from './data.js';
       document.getElementById("missionTradeStreak").textContent = `${openStreak} day${openStreak === 1 ? "" : "s"}`;
       document.getElementById("missionStreakMeta").textContent = `Studied streak ${studiedStreak} day${studiedStreak === 1 ? "" : "s"}. Journal entries: ${journalEntries.length}.`;
       document.getElementById("missionOpenReplays").textContent = replays.length ? `${replays.length} replay${replays.length === 1 ? "" : "s"} available` : "No open replays yet";
-      document.getElementById("missionReplayFocus").textContent = topReplay ? `${topReplay.symbol}: ${topReplay.replayLabel || topReplay.type || "Replay setup"}` : "Create replays by closing paper trades, journaling outcomes, or reviewing signal memory.";
+      document.getElementById("missionReplayFocus").textContent = storyReadout?.replay || (topReplay ? `${topReplay.symbol}: ${topReplay.replayLabel || topReplay.type || "Replay setup"}` : "Create replays by closing paper trades, journaling outcomes, or reviewing signal memory.");
       document.getElementById("missionGraveyardLesson").textContent = graveyardLesson ? `${graveyardLesson.symbol}: ${graveyardLesson.cause || "Warning active"}` : "No Graveyard lesson yet";
       document.getElementById("missionGraveyardRule").textContent = graveyardLesson ? graveyardLesson.prevention : "Avoid forcing trades until a real warning pattern appears.";
-      document.getElementById("missionDailyFocus").textContent = focus.goal;
-      document.getElementById("missionDailyFocusMeta").textContent = focus.detail;
-      document.getElementById("missionEagleDna").textContent = dnaReadout.headline;
-      document.getElementById("missionEagleDnaRule").textContent = dnaReadout.rule;
+      document.getElementById("missionDailyFocus").textContent = storyReadout?.focus || focus.goal;
+      document.getElementById("missionDailyFocusMeta").textContent = storyReadout?.detail || focus.detail;
+      document.getElementById("missionEagleDna").textContent = storyReadout?.headline || dnaReadout.headline;
+      document.getElementById("missionEagleDnaRule").textContent = storyReadout?.dnaRule || dnaReadout.rule;
       document.getElementById("missionConfidence").textContent = `${confidence}/100 · ${confidence >= 78 ? "Mission Ready" : confidence >= 58 ? "Selective" : "Study Mode"}`;
       document.getElementById("missionConfidenceRule").textContent = confidence >= 78
         ? `Confidence is high, but paper mode and Pilot Status still apply: ${pilot.status}.`
@@ -6441,6 +7043,19 @@ import { symbols, marketContext } from './data.js';
       const aiMode = panel.dataset.aiMode || "setup";
       const payload = { symbol: currentSymbol, data, gate, rejection, lightning, weather, action, score };
 
+      updateActiveSignalContext({
+        symbol: currentSymbol,
+        signalId: currentSignalReference(currentSymbol),
+        source: "eagle-scout",
+        eagleScore: score,
+        suggestedAction: action,
+        qualityGate: gate,
+        tradeRejection: rejection,
+        lightning,
+        marketWeather: weather,
+        marketRegime: weather.regime,
+        activeBlockers: [...new Set([...(gate.reasons || []), ...(rejection.blockers || [])])].slice(0, 8)
+      }, "eagleScout");
       renderDailyMission(payload);
       document.getElementById("eagleCommandTitle").textContent = `${currentSymbol} Eagle Scout Command`;
       document.getElementById("eagleCommandSummary").textContent = `${weather.label} market weather, ${gate.verdict} quality gate, ${rejection.verdict} rejection engine, ${lightning.verdict}.`;
@@ -6454,10 +7069,10 @@ import { symbols, marketContext } from './data.js';
       document.getElementById("eagleCommandMeter").style.width = `${score}%`;
       document.getElementById("eagleCommandMeter").className = tone.meter;
       document.getElementById("eagleCommandAction").textContent = action === "Confirm"
-        ? "Confirm only if entry trigger holds, then paper trade and journal."
+        ? "Confirm only if entry trigger holds, then use demo money and journal."
         : action === "Reject"
-          ? rejection.mainReason
-          : "Wait for the blocker list to clear before any paper entry.";
+          ? `${rejection.mainReason} Journaling the rejection completes the story.`
+          : "Wait for blockers to clear, or journal the wait as a completed decision.";
 
       document.getElementById("eagleCommandStrikeIn").textContent = `${lightning.inProbability}%`;
       document.getElementById("eagleCommandStrikeOut").textContent = `${lightning.outProbability}%`;
@@ -7393,8 +8008,8 @@ import { symbols, marketContext } from './data.js';
       document.getElementById("tradeDnaScore").textContent = dna.sampleSize ? `${dna.edgeScore}/100 DNA` : "Learning";
       document.getElementById("tradeDnaScore").className = `shrink-0 rounded-full border ${scoreTone} bg-zinc-950/70 px-2 py-1 text-[11px] font-black`;
       document.getElementById("tradeDnaSummary").textContent = dna.sampleSize
-        ? `${dna.closedCount} closed paper trades, ${dna.journalCount} journal outcomes, ${dna.replayCount} replay examples, and ${signalMemory.length} signal memories shaping your personal edge.`
-        : "Personal edge profile builds from paper trades, journal notes, replay outcomes, and signal memory.";
+        ? `${dna.closedCount} demo outcomes, ${dna.journalCount} journal decisions, ${dna.replayCount} replay lessons, and ${signalMemory.length} signal memories shaping what STRIKEPULSE remembers.`
+        : "Trade DNA learns what setups you handle best after each journal and replay.";
       document.getElementById("tradeDnaBestSetup").textContent = dna.bestSetup ? `${dna.bestSetup.key} · ${money(dna.bestSetup.expectancy)}/trade` : "--";
       document.getElementById("tradeDnaWorstSetup").textContent = dna.worstSetup ? `${dna.worstSetup.key} · ${money(dna.worstSetup.expectancy)}/trade` : "--";
       document.getElementById("tradeDnaBestTime").textContent = dna.bestSetup ? `${Math.round(dna.bestSetup.winRate * 100)}% win · ${tradeDnaPercent(dna.bestSetup.avgMove ?? dna.avgWinningMove)} avg move` : "--";
@@ -7405,6 +8020,21 @@ import { symbols, marketContext } from './data.js';
       const pilotFix = pilot.blockers[0] && pilot.blockers[0] !== "No major trader-risk blocker detected" ? `Pilot: ${pilot.blockers[0]}` : `Pilot: ${pilot.status}`;
       document.getElementById("tradeDnaFixes").innerHTML = [...dna.fixes, pilotFix].slice(0, 5).map(item => tradeDnaPill(item, item.includes("Journal") || item.includes("sample") || item.includes("Mission") || item.includes("Selective") ? "cyan" : "amber")).join("");
       document.getElementById("tradeDnaRecommendation").textContent = `${dna.recommendation} Pilot Status: ${pilot.status} (${pilot.readinessScore}/100). ${pilot.recommendations[0]}`;
+      if (activeSignalContext?.signalId) {
+        updateActiveSignalContext({
+          signalId: activeSignalContext.signalId,
+          symbol: activeSignalContext.symbol || currentSymbol,
+          source: "trade-dna",
+          learning: {
+            tradeDnaEdgeScore: dna.edgeScore,
+            tradeDnaDisciplineScore: dna.disciplineScore,
+            tradeDnaBestSetup: dna.bestSetup?.key || null,
+            tradeDnaWorstSetup: dna.worstSetup?.key || null,
+            tradeDnaRecommendation: dna.recommendation
+          }
+        }, "tradeDna");
+      }
+      renderSignalStoryStatus();
     }
 
     function replaySignalScore(item) {
@@ -7516,21 +8146,14 @@ import { symbols, marketContext } from './data.js';
 
     function selectLearningReplayForJournal(entry, options = {}) {
       const select = document.getElementById("signalReplaySelect");
-      if (!select || !entry) return null;
+      if (!select || !entry?.signalId) return null;
       const items = renderSignalReplayOptions();
       if (!items.length) return null;
-      const scored = items.map(item => {
-        let score = 0;
-        if (entry.signalId && item.signalId === entry.signalId) score += 120;
-        if (entry.journalId && item.journalId === entry.journalId) score += 100;
-        if (item.symbol === entry.symbol) score += 45;
-        if (item.contract && entry.contract && item.contract === entry.contract) score += 20;
-        if (item.outcome && item.outcome === entry.outcome) score += 12;
-        if (item.type === "paper") score += 8;
-        if (item.type === "journal" && ["Win", "Loss", "Breakeven", "Skipped"].includes(entry.outcome)) score += 16;
-        return { item, score };
-      }).sort((a, b) => b.score - a.score);
-      const match = scored[0]?.score > 0 ? scored[0].item : items[0];
+      const exactMatches = items.filter(item => item.signalId === entry.signalId);
+      const match = exactMatches.find(item => item.journalId === entry.journalId)
+        || exactMatches.find(item => item.type === "journal")
+        || exactMatches[0]
+        || null;
       if (!match) return null;
       select.value = match.replayId;
       renderSignalReplay({ activateChart: Boolean(options.activateReplay) });
@@ -7546,7 +8169,7 @@ import { symbols, marketContext } from './data.js';
       document.getElementById("signalReplayScore").textContent = "--";
       document.getElementById("signalReplayPredicted").textContent = "--";
       document.getElementById("signalReplayActual").textContent = "--";
-      document.getElementById("signalReplayMarket").textContent = "No replay history yet. Start with one paper trade or save one completed journal outcome, then STRIKEPULSE can turn it into a candle-by-candle lesson.";
+      document.getElementById("signalReplayMarket").textContent = "No replay history yet. Use demo money or journal a Wait/Reject decision, then STRIKEPULSE can turn it into the first lesson.";
       document.getElementById("signalReplayIndicators").innerHTML = "";
       document.getElementById("signalReplayCompare").textContent = "Replay is the corrective loop: it shows what confirmed, what failed, and what the next decision should avoid.";
       const pulseTitle = document.getElementById("signalReplayPulseTitle");
@@ -7554,6 +8177,7 @@ import { symbols, marketContext } from './data.js';
       if (pulseTitle) pulseTitle.textContent = "No replayable signals yet";
       if (pulseAction) pulseAction.textContent = "Use demo money or journal a skipped trade to unlock the first lesson.";
       resetTradeReplay();
+      renderSignalStoryStatus();
     }
 
     function replayNumericSeed(item) {
@@ -7885,6 +8509,23 @@ import { symbols, marketContext } from './data.js';
       const hit = compare.includes("aligned") || compare.includes("conservative");
       loadTradeReplay(item, score, Boolean(options.activateChart));
       if (options.activateChart) markStartFlowStep("replay");
+      if (item.signalId) {
+        updateActiveSignalContext({
+          signalId: item.signalId,
+          symbol: item.symbol || currentSymbol,
+          source: "replay",
+          eagleScore: score,
+          suggestedAction: hit ? "Replay aligned" : "Replay review",
+          learning: {
+            replayId: item.replayId,
+            predictedOutcome: predicted.prediction,
+            actualOutcome: actual.label,
+            replayComparison: compare
+          }
+        }, "replay");
+        linkActiveSignalContext("replay", item.replayId);
+      }
+      renderSignalStoryStatus();
       document.getElementById("signalReplayStatus").textContent = hit ? "Matched" : "Review";
       document.getElementById("signalReplayScore").textContent = score === null ? "--" : `${score}/100`;
       document.getElementById("signalReplayPredicted").textContent = predicted.prediction;
@@ -8034,6 +8675,7 @@ import { symbols, marketContext } from './data.js';
       const commandRanked = rankSetups().sort((a, b) => b.opportunityScore - a.opportunityScore);
       renderDailyCommandCenter(commandRanked, commandRanked[0], getMarketWeather(currentSymbol));
       renderPilotStatus();
+      renderSignalStoryStatus();
       if (!journalEntries.length) {
         list.innerHTML = `
           <div class="rounded-lg border border-cyan-300/20 bg-cyan-300/10 p-3 text-sm text-cyan-50/80">
@@ -8062,17 +8704,19 @@ import { symbols, marketContext } from './data.js';
     }
 
     function saveJournalEntry() {
-      const data = symbols[currentSymbol];
+      const contextSymbol = activeSignalContext?.symbol && symbols[activeSignalContext.symbol] ? activeSignalContext.symbol : currentSymbol;
+      const data = symbols[contextSymbol] || symbols[currentSymbol];
+      const context = ensureSignalContext(contextSymbol, "journal");
       const rawNote = document.getElementById("journalNote").value.trim();
       const redactedNote = redactPersonalInfo(rawNote);
-      const signalId = currentSignalReference(currentSymbol);
-      const journalId = `J-${Date.now()}-${currentSymbol}`;
+      const signalId = context?.signalId || currentSignalReference(contextSymbol);
+      const journalId = `J-${Date.now()}-${contextSymbol}`;
       const entry = {
         journalId,
         signalId,
-        symbol: currentSymbol,
+        symbol: contextSymbol,
         signal: data.type,
-        contract: currentContractLabel(),
+        contract: currentContractLabelFor(contextSymbol),
         entryTrigger: data.entry.trigger,
         stop: money(getStopPrice(data)),
         target: money(data.target),
@@ -8082,7 +8726,7 @@ import { symbols, marketContext } from './data.js';
           signalScore: data.confidence,
           verdict: getQualityGate(data).verdict,
           predictedOutcome: predictionFromSignal(data.confidence, getQualityGate(data).verdict, data.type),
-          marketConditions: currentMarketSnapshot(currentSymbol),
+          marketConditions: currentMarketSnapshot(contextSymbol),
           indicators: currentIndicatorSnapshot(data)
         },
         note: redactedNote,
@@ -8104,6 +8748,26 @@ import { symbols, marketContext } from './data.js';
       } else {
         linkSignalLedger(signalId, "journal", journalId, { userVerdict: entry.outcome });
       }
+      updateActiveSignalContext({
+        signalId,
+        symbol: entry.symbol,
+        source: "journal",
+        suggestedAction: entry.outcome,
+        learning: {
+          journalOutcome: entry.outcome,
+          journalTags: entry.tags,
+          journalNoteSaved: Boolean(entry.note)
+        }
+      }, "journal");
+      const journalContextPatch = { userVerdict: entry.outcome };
+      if (["Win", "Loss", "Breakeven", "Skipped"].includes(entry.outcome)) {
+        journalContextPatch.outcome = {
+          status: entry.outcome === "Skipped" ? "Skipped" : "Closed",
+          winLoss: entry.outcome,
+          source: "local-journal"
+        };
+      }
+      linkActiveSignalContext("journal", journalId, journalContextPatch);
       queueCloudSync("journal-entry");
       document.getElementById("journalNote").value = "";
       selectedJournalTags = [];
@@ -8113,13 +8777,14 @@ import { symbols, marketContext } from './data.js';
       renderJournal();
       const completedOutcome = ["Win", "Loss", "Breakeven", "Skipped"].includes(entry.outcome);
       const replayMatch = selectLearningReplayForJournal(entry, { activateReplay: completedOutcome });
+      renderTradeDna();
       const dna = buildTradeDna();
       if (replayMatch && completedOutcome) {
-        showNeutralToast(rawNote !== redactedNote ? "Journal saved with personal info redacted. Replay is loaded." : `${currentSymbol} journal saved. Replay loaded for the lesson.`);
+        showNeutralToast(rawNote !== redactedNote ? "Journal saved with personal info redacted. Replay is loaded." : `${entry.symbol} journal saved. Replay loaded for the lesson.`);
       } else if (replayMatch) {
-        showNeutralToast(rawNote !== redactedNote ? "Journal saved with personal info redacted. Trade DNA refreshed." : `${currentSymbol} journal saved. Trade DNA refreshed with ${dna.sampleSize} learning samples.`);
+        showNeutralToast(rawNote !== redactedNote ? "Journal saved with personal info redacted. Trade DNA refreshed." : `${entry.symbol} journal saved. Trade DNA refreshed with ${dna.sampleSize} learning samples.`);
       } else {
-        showNeutralToast(rawNote !== redactedNote ? "Journal saved with personal info redacted" : `${currentSymbol} journal note saved`);
+        showNeutralToast(rawNote !== redactedNote ? "Journal saved with personal info redacted" : `${entry.symbol} journal note saved`);
       }
     }
 
@@ -8168,6 +8833,18 @@ import { symbols, marketContext } from './data.js';
       journalEntries = [entry, ...journalEntries].slice(0, 12);
       localStorage.setItem("strikepulseJournal", JSON.stringify(journalEntries));
       linkSignalLedger(snapshot.signalId, "journal", entry.journalId, { userVerdict: "Planned" });
+      updateActiveSignalContext({
+        signalId: snapshot.signalId,
+        symbol: snapshot.symbol,
+        source: "journal-signal-ticket",
+        suggestedAction: "Planned",
+        learning: {
+          journalOutcome: "Planned",
+          optionTicker: snapshot.optionTicker,
+          contract: snapshot.contract
+        }
+      }, "journal");
+      linkActiveSignalContext("journal", entry.journalId, { userVerdict: "Planned" });
       queueCloudSync("journal-signal-ticket");
       renderJournal();
       showNeutralToast(`${snapshot.optionTicker} journal ticket saved`);
@@ -8950,6 +9627,30 @@ import { symbols, marketContext } from './data.js';
     });
     window.addEventListener("resize", resizeCanvas);
 
+    function isMobileLaunchSurface() {
+      return window.matchMedia?.("(max-width: 640px)")?.matches
+        || window.matchMedia?.("(display-mode: standalone)")?.matches
+        || window.navigator.standalone === true;
+    }
+
+    function focusMissionBriefingFirstScreen() {
+      if (window.location.hash) return;
+      const mission = document.getElementById("dailyCommandCenter");
+      if (!mission) return;
+      requestAnimationFrame(() => {
+        mission.scrollIntoView({ behavior: "auto", block: "start" });
+      });
+    }
+
+    function registerStrikepulsePwa() {
+      if (!("serviceWorker" in navigator)) return;
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js").catch(() => {
+          // PWA install remains optional; local-first app behavior is unchanged if registration fails.
+        });
+      });
+    }
+
     renderButtons();
     renderEagleLayerControls();
     renderScreenshotControls();
@@ -8972,9 +9673,11 @@ import { symbols, marketContext } from './data.js';
     renderFeedbackCenter();
     renderQuickFeedbackButtons();
     renderEagleScoutCommandCenter();
+    focusMissionBriefingFirstScreen();
+    registerStrikepulsePwa();
     initializeSupabaseAuth();
     refreshBackendHealth();
-    if (!userPreferences.onboarded) {
+    if (!userPreferences.onboarded && !isMobileLaunchSurface()) {
       document.getElementById("prefsModal").classList.remove("hidden");
     }
     renderAppHealth();

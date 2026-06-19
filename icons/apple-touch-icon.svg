@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="STRIKEPULSE iOS icon placeholder">
+  <rect width="180" height="180" rx="40" fill="#0B1020"/>
+  <path d="M90 18 145 43v39c0 37-23 65-55 79-32-14-55-42-55-79V43l55-25Z" fill="#1E5EFF"/>
+  <circle cx="55" cy="42" r="14" fill="#00E5FF"/>
+  <path d="M137 15 104 81h22l-20 72 51-91h-26l6-47Z" fill="#22FF88" stroke="#0B1020" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M56 100c18-25 42-40 78-46-15 14-21 31-20 50-13-8-29-11-58-4Z" fill="#FFFFFF"/>
+  <circle cx="108" cy="72" r="5" fill="#0B1020"/>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="STRIKEPULSE app icon placeholder">
+  <rect width="512" height="512" rx="112" fill="#0B1020"/>
+  <path d="M256 54 410 123v112c0 106-64 184-154 224-90-40-154-118-154-224V123L256 54Z" fill="#1E5EFF"/>
+  <path d="M256 86 374 139v90c0 81-48 144-118 179-70-35-118-98-118-179v-90l118-53Z" fill="none" stroke="#B8C2CC" stroke-width="14" opacity=".8"/>
+  <circle cx="154" cy="120" r="40" fill="#00E5FF"/>
+  <path d="M389 43 294 229h64l-58 202 144-256h-72l17-132Z" fill="#22FF88" stroke="#0B1020" stroke-width="22" stroke-linejoin="round"/>
+  <path d="M160 283c51-72 118-115 221-130-42 40-59 88-56 144-38-24-82-31-165-14Z" fill="#FFFFFF"/>
+  <circle cx="309" cy="202" r="16" fill="#0B1020"/>
+  <path d="M166 352h186" stroke="#0B1020" stroke-width="38" stroke-linecap="round"/>
+</svg>
