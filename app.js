@@ -9158,19 +9158,13 @@ import { symbols, marketContext } from './data.js';
     }
 
     function applyFocusMode() {
-      const focusable = ["qualityGate", "chart", "entryStatus", "stopLoss", "premiumStatus"];
-      document.querySelectorAll("#marketContextPanel, #topSetups, #avoidSetups").forEach(element => {
-        element.closest("section").classList.toggle("hidden", focusMode);
-      });
-      document.querySelectorAll("aside > section").forEach(section => {
-        const keep = section.textContent.includes("Premium Tracker") || section.textContent.includes("Alert Builder") || section.textContent.includes("Contract Selector");
-        section.classList.toggle("hidden", focusMode && !keep);
-      });
+      document.body.dataset.advancedMode = focusMode ? "true" : "false";
       const button = document.getElementById("focusToggle");
       button.className = focusMode
         ? "inline-flex h-10 w-10 items-center justify-center gap-2 rounded-lg border border-emerald-500/40 bg-emerald-500/15 text-sm font-bold text-emerald-100 hover:bg-emerald-500/20 sm:w-auto sm:px-3"
         : "inline-flex h-10 w-10 items-center justify-center gap-2 rounded-lg border border-cyan-500/40 bg-cyan-500/10 text-sm font-bold text-cyan-100 hover:bg-cyan-500/20 sm:w-auto sm:px-3";
-      button.querySelector("span").textContent = focusMode ? "Focused" : "Focus";
+      button.setAttribute("aria-label", focusMode ? "Return to core Signal Story" : "Show advanced controls");
+      button.querySelector("span").textContent = focusMode ? "Core" : "Advanced";
       localStorage.setItem("strikepulseFocus", String(focusMode));
       requestAnimationFrame(resizeCanvas);
     }
@@ -9635,7 +9629,7 @@ import { symbols, marketContext } from './data.js';
 
     function focusMissionBriefingFirstScreen() {
       if (window.location.hash) return;
-      const mission = document.getElementById("dailyCommandCenter");
+      const mission = document.getElementById("eagleCommandCenter");
       if (!mission) return;
       requestAnimationFrame(() => {
         mission.scrollIntoView({ behavior: "auto", block: "start" });

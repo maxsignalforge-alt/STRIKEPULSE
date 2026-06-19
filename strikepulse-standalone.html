@@ -168,37 +168,103 @@
     .brand-mark {
       filter: drop-shadow(0 10px 22px color-mix(in srgb, var(--sf-accent) 26%, transparent));
     }
-    body[data-launch-mode="true"] .setup-tape,
-    body[data-launch-mode="true"] #cockpitPriorityStrip,
-    body[data-launch-mode="true"] #marketWeatherPanel,
-    body[data-launch-mode="true"] #bestOpportunityPanel,
-    body[data-launch-mode="true"] #tradeRejectionEngine,
-    body[data-launch-mode="true"] #shareSignalPanel,
-    body[data-launch-mode="true"] #screenshotSignalCheck,
-    body[data-launch-mode="true"] #proofEnginePanel,
-    body[data-launch-mode="true"] #replayOutcomeLibraryPanel,
-    body[data-launch-mode="true"] #signalGraveyardPanel,
-    body[data-launch-mode="true"] #dailyCommandCenter ~ *,
-    body[data-launch-mode="true"] div:has(> #eagleCommandScreenshot),
-    body[data-launch-mode="true"] div:has(> #eagleCommandGraveyard),
-    body[data-launch-mode="true"] div:has(> #eagleCommandProof),
-    body[data-launch-mode="true"] div:has(> #agentReadinessSummary),
-    body[data-launch-mode="true"] div:has(> #journalSampleSize),
-    body[data-launch-mode="true"] section:has(> .mb-3 #optionIntelStatus),
-    body[data-launch-mode="true"] section:has(> .mb-3 #riskManagerSummary),
-    body[data-launch-mode="true"] section:has(> .mb-4 #managementSummary),
-    body[data-launch-mode="true"] section:has(> .mb-3 #optionsGrade),
-    body[data-launch-mode="true"] section:has(> .mb-3 #contractVerdict),
-    body[data-launch-mode="true"] section:has(> .mb-3 #premiumStatus),
-    body[data-launch-mode="true"] section:has(> .mb-3 #alertCount),
-    body[data-launch-mode="true"] section:has(> .mb-3 #appVersion),
-    body[data-launch-mode="true"] section:has(> .mb-3 #launchReadinessSummary),
-    body[data-launch-mode="true"] section:has(> .mb-3 #feedbackCount),
-    body[data-launch-mode="true"] section:has(> div #privacyPayloadPreview),
-    body[data-launch-mode="true"] main > section:has(#trialButton) {
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) .setup-tape,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #prefsButton,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #authButton,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #mentorButton,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #cockpitPriorityStrip,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #tickerStrip,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) label:has(> #search),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> button.range),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #loadDemoMode,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #startFlowScore,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #resetStartFlow,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #startFlowList,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #operatingLoopSteps,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #marketWeatherPanel,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #bestOpportunityPanel,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #marketContextPanel,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #tradeRejectionEngine,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #shareSignalPanel,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #screenshotSignalCheck,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #proofEnginePanel,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #replayOutcomeLibraryPanel,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #signalGraveyardPanel,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #dailyCommandCenter ~ *,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #missionProofPulse),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #missionPilotStatus),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #missionWeather),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #missionEagleBriefing),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #missionLightningList),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #missionDangerList),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #missionTradeStreak),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #missionOpenReplays),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #missionGraveyardLesson),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #missionDailyFocus),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #missionEagleDna),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #missionConfidence),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #eagleCommandScreenshot),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #eagleCommandGraveyard),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #eagleCommandProof),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) label:has(> #eagleCommandLightningToggle),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #eagleCommandStrikeIn),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #eagleCommandStrikeOut),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #eagleCommandLightningSummary,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #eagleCommandMiniChart),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #eagleCommandReplayPlay),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #eagleCommandReplayLesson,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #eagleCommandAiBody),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #eagleScoutOpenScreenshot,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #chartTypeSelect),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #eagleLayerBar,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) section:has(> .mb-3 #optionIntelStatus),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) section:has(> .mb-3 #riskManagerSummary),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) section:has(> .mb-4 #managementSummary),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) section:has(> .mb-3 #optionsGrade),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) section:has(> .mb-3 #contractVerdict),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) section:has(> .mb-3 #premiumStatus),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) section:has(> .mb-3 #alertCount),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) section:has(> .mb-3 #appVersion),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) section:has(> .mb-3 #launchReadinessSummary),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) section:has(> .mb-3 #feedbackCount),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) section:has(> div #privacyPayloadPreview),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #agentReadinessSummary),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #practiceCash),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #practiceEquity),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #practiceOpenPnl),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #practiceRealizedPnl),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #practiceWinRate),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #practiceAvgPnl),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #practiceAvgGrade),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #practiceRiskyEntries),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #journalTags),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #journalSampleSize),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #tradeDnaBestSetup),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #tradeDnaWorstSetup),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #tradeDnaBestTime),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #tradeDnaHoldProfile),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #tradeDnaTopMistake),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #tradeDnaDiscipline),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #tradeDnaStrengths),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #tradeDnaFixes),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #tradeReplaySpeed),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #tradeReplayClock),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #tradeReplayScrubber),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #tradeReplayCandles),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #tradeReplayCandle),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #tradeReplayEagle),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #tradeReplayLightning),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #tradeReplayGraveyard),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #signalReplayScore),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #signalReplayPredicted),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #signalReplayActual),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #signalReplayMarket),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #signalReplayIndicators),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> #signalReplayCompare),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) .launch-hidden {
       display: none !important;
     }
-    body[data-launch-mode="true"] .launch-hidden {
+    body[data-launch-mode="true"] main > section:has(#trialButton) {
       display: none !important;
     }
     .sf-shield { fill: var(--sf-logo-shield); }
@@ -472,8 +538,8 @@
         <div class="hidden items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-sm font-bold text-emerald-300 sm:flex">
           <span class="h-2 w-2 rounded-full bg-emerald-300"></span> LIVE
         </div>
-        <button id="focusToggle" class="sf-accent-button inline-flex h-10 w-10 items-center justify-center gap-2 rounded-lg border text-sm font-bold hover:bg-cyan-500/20 sm:w-auto sm:px-3" aria-label="Focus mode">
-          <i class="fa-solid fa-eye"></i><span class="hidden sm:inline">Focus</span>
+        <button id="focusToggle" class="sf-accent-button inline-flex h-10 w-10 items-center justify-center gap-2 rounded-lg border text-sm font-bold hover:bg-cyan-500/20 sm:w-auto sm:px-3" aria-label="Advanced controls">
+          <i class="fa-solid fa-sliders"></i><span class="hidden sm:inline">Advanced</span>
         </button>
         <button id="prefsButton" class="inline-flex h-10 w-10 items-center justify-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 text-sm font-bold hover:bg-zinc-800 sm:w-auto sm:px-3" aria-label="Preferences">
           <i class="fa-solid fa-sliders"></i><span class="hidden sm:inline">Prefs</span>
@@ -532,7 +598,7 @@
       </div>
     </section>
 
-    <section class="mb-5 rounded-lg border border-cyan-400/25 bg-zinc-950/80 p-4">
+    <section class="launch-hidden mb-5 rounded-lg border border-cyan-400/25 bg-zinc-950/80 p-4">
       <div class="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-center">
         <div>
           <p class="text-xs font-black uppercase text-cyan-200">Signal intelligence for disciplined options traders</p>
@@ -769,7 +835,7 @@
                 <p id="eagleCommandAction" class="mt-3 text-xs font-bold leading-relaxed text-amber-100/80">Waiting for a setup.</p>
               </div>
 
-              <div class="sp-premium-card rounded-lg border border-zinc-800 bg-zinc-900/80 p-3">
+              <div class="launch-hidden sp-premium-card rounded-lg border border-zinc-800 bg-zinc-900/80 p-3">
                 <div class="flex items-center justify-between gap-3">
                   <p class="text-xs font-black uppercase text-zinc-500">Lightning Layer</p>
                   <label class="inline-flex items-center gap-2 text-xs font-black text-zinc-300">
@@ -792,7 +858,7 @@
             </div>
 
             <div class="space-y-3">
-              <div class="sp-premium-card rounded-lg border border-zinc-800 bg-zinc-900/80 p-3">
+              <div class="launch-hidden sp-premium-card rounded-lg border border-zinc-800 bg-zinc-900/80 p-3">
                 <div class="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <p class="text-xs font-black uppercase text-zinc-500">Command Chart + Replay</p>
                   <span id="eagleCommandReplayState" class="rounded-full border border-indigo-300/30 bg-indigo-300/10 px-2 py-1 text-[11px] font-black text-indigo-100">Replay Ready</span>
@@ -837,7 +903,7 @@
               </div>
             </div>
 
-            <div class="rounded-lg border border-cyan-300/20 bg-cyan-300/10 p-4">
+            <div class="launch-hidden rounded-lg border border-cyan-300/20 bg-cyan-300/10 p-4">
               <div class="flex items-start justify-between gap-3">
                 <div>
                   <p class="text-xs font-black uppercase text-cyan-100/75">Eagle Scout AI Panel</p>
@@ -861,7 +927,7 @@
           </div>
         </section>
 
-        <section class="rounded-lg border border-cyan-400/25 bg-zinc-950/90 p-4 shadow-2xl shadow-black/30">
+        <section class="launch-hidden rounded-lg border border-cyan-400/25 bg-zinc-950/90 p-4 shadow-2xl shadow-black/30">
           <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
               <h3 class="flex items-center gap-2 text-lg font-black">
@@ -3372,64 +3438,7 @@
     </div>
   </div>
   <script>
-﻿const appConfig = {
-  appName: "STRIKEPULSE",
-  version: "0.1.0-prototype",
-  providerMode: "mock",
-  apiBaseUrl: "http://127.0.0.1:8787",
-  backendEnabled: true,
-  supabase: {
-    enabled: true,
-    url: "https://nllomtyefgmehnwxnjez.supabase.co",
-    anonKey: "sb_publishable_9daUEJG1k5z_6pLyilzekg_1nELR_WB",
-    authMode: "supabase-js",
-    localFallback: true,
-    cloudSyncEnabled: false
-  },
-  pricing: {
-    free: "$0",
-    pro: "$29/mo",
-    eliteAi: "$59/mo",
-    desk: "$149/mo"
-  },
-  features: {
-    aiCopilot: true,
-    phonePush: false,
-    browserNotifications: true,
-    setupRadar: true,
-    privacyMode: true,
-    affiliateStack: true,
-    marketWeather: true,
-    lightningStrikeSystem: true,
-    lightningStrikeAlerts: true
-  },
-  premiumControls: {
-    lightningStrikeAlerts: "pro",
-    eagleScoutEliteLayers: "eliteAi",
-    screenshotAiAnalysis: "eliteAi",
-    tradeReplayArchive: "pro",
-    aiCoach: "eliteAi"
-  },
-  alerts: {
-    defaultNineSigThreshold: 6,
-    cooldownMs: 45000,
-    scanEveryTicks: 5
-  },
-  dataRefresh: {
-    liveTickMs: 3000,
-    enrichEveryTicks: 10,
-    rankingEveryTicks: 4,
-    qualityEveryTicks: 2
-  },
-  compliance: {
-    simulatedData: true,
-    educationalOnly: true,
-    noFinancialAdvice: true,
-    noGuaranteedOutcomes: true
-  }
-};
-
-﻿    const symbols = {
+const symbols = {
       NVDA: {
         price: 142.87, move: 2.34, target: 158.4, confidence: 87, type: "Bullish", sector: "Semiconductors", risk: "Moderate", stopPct: 0.032, stopType: "VWAP reclaim",
         options: { grade: "A+", liquidity: "Elite", spread: "$0.05", iv: 42, flow: "Calls", setup: "Weekly ATM call after 1m candle holds above VWAP. Avoid entries when spread exceeds $0.10." },
@@ -3707,9 +3716,7 @@
         ]
       }
     };
-
-
-    const marketContext = {
+const marketContext = {
       spy: { trend: "Bullish", score: 78 },
       qqq: { trend: "Bullish", score: 84 },
       vix: { state: "Calm", score: 74 },
@@ -3737,7 +3744,9 @@
 
 
 
-﻿
+
+﻿import { appConfig } from './config.js';
+
     const defaultPreferences = {
       style: "scalp",
       risk: "100",
@@ -12895,19 +12904,13 @@
     }
 
     function applyFocusMode() {
-      const focusable = ["qualityGate", "chart", "entryStatus", "stopLoss", "premiumStatus"];
-      document.querySelectorAll("#marketContextPanel, #topSetups, #avoidSetups").forEach(element => {
-        element.closest("section").classList.toggle("hidden", focusMode);
-      });
-      document.querySelectorAll("aside > section").forEach(section => {
-        const keep = section.textContent.includes("Premium Tracker") || section.textContent.includes("Alert Builder") || section.textContent.includes("Contract Selector");
-        section.classList.toggle("hidden", focusMode && !keep);
-      });
+      document.body.dataset.advancedMode = focusMode ? "true" : "false";
       const button = document.getElementById("focusToggle");
       button.className = focusMode
         ? "inline-flex h-10 w-10 items-center justify-center gap-2 rounded-lg border border-emerald-500/40 bg-emerald-500/15 text-sm font-bold text-emerald-100 hover:bg-emerald-500/20 sm:w-auto sm:px-3"
         : "inline-flex h-10 w-10 items-center justify-center gap-2 rounded-lg border border-cyan-500/40 bg-cyan-500/10 text-sm font-bold text-cyan-100 hover:bg-cyan-500/20 sm:w-auto sm:px-3";
-      button.querySelector("span").textContent = focusMode ? "Focused" : "Focus";
+      button.setAttribute("aria-label", focusMode ? "Return to core Signal Story" : "Show advanced controls");
+      button.querySelector("span").textContent = focusMode ? "Core" : "Advanced";
       localStorage.setItem("strikepulseFocus", String(focusMode));
       requestAnimationFrame(resizeCanvas);
     }
@@ -13372,7 +13375,7 @@
 
     function focusMissionBriefingFirstScreen() {
       if (window.location.hash) return;
-      const mission = document.getElementById("dailyCommandCenter");
+      const mission = document.getElementById("eagleCommandCenter");
       if (!mission) return;
       requestAnimationFrame(() => {
         mission.scrollIntoView({ behavior: "auto", block: "start" });
