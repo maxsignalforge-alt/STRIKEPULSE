@@ -2285,6 +2285,33 @@ import { symbols, marketContext } from './data.js';
       openEagleScoutScreenshotCheck();
     }
 
+    function fillLaunchDecisionJournal(decision) {
+      const note = document.getElementById("journalNote");
+      const outcome = document.getElementById("journalOutcome");
+      const explanation = buildEagleScoutExplanation(activeEagleScoutMarker);
+      const isReject = decision === "Reject";
+      const decisionTag = isReject ? "Rejected" : "Wait";
+      const failedChecks = Array.isArray(explanation.failed) && explanation.failed.length
+        ? explanation.failed.join("; ")
+        : "risk outweighed reward";
+      const noteText = isReject
+        ? `${explanation.title}: Rejected. ${explanation.why} Failed checks: ${failedChecks}.`
+        : `${explanation.title}: Wait. ${explanation.why} Recheck only after cleaner confirmation.`;
+      ensureSignalContext(explanation?.symbol || currentSymbol, "eagleScout");
+      if (outcome) outcome.value = "Skipped";
+      if (note) note.value = noteText;
+      selectedJournalTags = [...new Set([...(selectedJournalTags || []), "Eagle Scout", decisionTag, "Skipped"])];
+      document.querySelectorAll(".journal-tag").forEach(button => {
+        const active = selectedJournalTags.includes(button.dataset.tag);
+        button.className = active
+          ? "journal-tag rounded-full border border-amber-300 bg-amber-300/15 px-3 py-1 text-xs font-bold text-amber-100"
+          : "journal-tag rounded-full border border-zinc-700 px-3 py-1 text-xs font-bold text-zinc-300 hover:bg-zinc-800";
+      });
+      eagleScoutJumpTo("journalNote", "journal");
+      note?.focus();
+      showNeutralToast(`${decision} decision ready to journal`);
+    }
+
     function openEagleScoutJournal() {
       const note = document.getElementById("journalNote");
       const outcome = document.getElementById("journalOutcome");
@@ -5413,6 +5440,9 @@ import { symbols, marketContext } from './data.js';
       const primary = document.getElementById("eagleScoutOpenPaper");
       const replay = document.getElementById("eagleScoutOpenReplay");
       const journal = document.getElementById("eagleScoutOpenJournal");
+      const launchSummary = document.getElementById("launchDecisionSummary");
+      const launchCoreVerdict = document.getElementById("launchCoreVerdict");
+      const launchCoreRule = document.getElementById("launchCoreRule");
       const tones = {
         emerald: "border-emerald-300/35 bg-emerald-300/10 text-emerald-100 hover:bg-emerald-300/20",
         rose: "border-rose-300/35 bg-rose-300/10 text-rose-100 hover:bg-rose-300/20",
@@ -5436,6 +5466,17 @@ import { symbols, marketContext } from './data.js';
       if (journal) {
         journal.innerHTML = `<i class="fa-solid fa-book-open mr-1"></i> ${plan.journalLabel}`;
         journal.dataset.outcome = plan.journalOutcome;
+      }
+      if (launchSummary) {
+        launchSummary.textContent = `${explanation?.symbol || currentSymbol}: ${explanation?.suggestedAction || "Wait"} read. Choose Paper Trade, Wait, or Reject to finish this Signal Story.`;
+      }
+      if (launchCoreVerdict) {
+        launchCoreVerdict.textContent = `${explanation?.symbol || currentSymbol}: ${explanation?.suggestedAction || "Wait"}`;
+      }
+      if (launchCoreRule) {
+        launchCoreRule.textContent = plan.primaryAction === "paper"
+          ? "Demo paper trade is allowed. Journal the plan next."
+          : `${plan.primaryLabel} is safer. Journal it, then replay.`;
       }
     }
 
@@ -9347,6 +9388,26 @@ import { symbols, marketContext } from './data.js';
       paperTradeSignalTicket();
       markStartFlowStep("paper");
     });
+    document.getElementById("launchPaperTrade")?.addEventListener("click", () => {
+      paperTradeSignalTicket();
+      markStartFlowStep("paper");
+    });
+    document.getElementById("launchCorePaperTrade")?.addEventListener("click", () => {
+      paperTradeSignalTicket();
+      markStartFlowStep("paper");
+    });
+    document.getElementById("launchWaitDecision")?.addEventListener("click", () => {
+      fillLaunchDecisionJournal("Wait");
+    });
+    document.getElementById("launchCoreWaitDecision")?.addEventListener("click", () => {
+      fillLaunchDecisionJournal("Wait");
+    });
+    document.getElementById("launchRejectDecision")?.addEventListener("click", () => {
+      fillLaunchDecisionJournal("Reject");
+    });
+    document.getElementById("launchCoreRejectDecision")?.addEventListener("click", () => {
+      fillLaunchDecisionJournal("Reject");
+    });
     document.getElementById("journalSignal").addEventListener("click", () => {
       journalSignalTicket();
       markStartFlowStep("journal");
@@ -9629,7 +9690,7 @@ import { symbols, marketContext } from './data.js';
 
     function focusMissionBriefingFirstScreen() {
       if (window.location.hash) return;
-      const mission = document.getElementById("eagleCommandCenter");
+      const mission = document.getElementById("launchCoreMission") || document.getElementById("eagleCommandCenter");
       if (!mission) return;
       requestAnimationFrame(() => {
         mission.scrollIntoView({ behavior: "auto", block: "start" });

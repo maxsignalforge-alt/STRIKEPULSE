@@ -176,11 +176,19 @@
     body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #tickerStrip,
     body[data-launch-mode="true"]:not([data-advanced-mode="true"]) label:has(> #search),
     body[data-launch-mode="true"]:not([data-advanced-mode="true"]) div:has(> button.range),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) main > section.grid > div.space-y-5 > .grid:has(#search),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) main > section.grid > div.space-y-5 > section:has(#startFirstAnalysis),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) main > section.grid > div.space-y-5 > section:has(#operatingLoopVerdict),
     body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #loadDemoMode,
     body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #startFlowScore,
     body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #resetStartFlow,
     body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #startFlowList,
     body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #operatingLoopSteps,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #eagleCommandBadges,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) [data-quick-feedback-area],
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #eagleScoutBenchmarkPanel,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) section:has(#aiCopilotSummary),
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) section:has(#practiceStartingCash),
     body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #marketWeatherPanel,
     body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #bestOpportunityPanel,
     body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #marketContextPanel,
@@ -266,6 +274,19 @@
     }
     body[data-launch-mode="true"] main > section:has(#trialButton) {
       display: none !important;
+    }
+    body[data-launch-mode="true"][data-advanced-mode="true"] #launchCoreMission {
+      display: none !important;
+    }
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) {
+      overflow-x: hidden;
+    }
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #launchCoreMission {
+      max-width: calc(100vw - 2rem);
+    }
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #launchCoreSummary,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #launchCoreRule {
+      overflow-wrap: anywhere;
     }
     .sf-shield { fill: var(--sf-logo-shield); }
     .sf-wing { fill: var(--sf-logo-wing); }
@@ -564,7 +585,7 @@
   </section>
 
   <main class="grid-bg mx-auto max-w-7xl px-4 py-5 sm:px-6">
-    <section class="mb-5 rounded-lg border border-amber-300/25 bg-amber-300/10 p-4 text-sm leading-relaxed text-amber-100/85">
+    <section class="launch-hidden mb-5 rounded-lg border border-amber-300/25 bg-amber-300/10 p-4 text-sm leading-relaxed text-amber-100/85">
       <div class="flex items-start gap-3">
         <i class="fa-solid fa-triangle-exclamation mt-0.5 text-amber-300"></i>
         <p>
@@ -619,6 +640,28 @@
             <p class="mt-1 text-[11px] font-bold uppercase text-zinc-500">Broker Logins</p>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section id="launchCoreMission" class="mb-5 overflow-hidden rounded-lg border border-amber-300/30 bg-zinc-950/90 p-4">
+      <p class="text-[11px] font-black uppercase tracking-[0.16em] text-amber-100/75">Mission Briefing</p>
+      <h2 id="launchCoreTitle" class="mt-1 text-xl font-black leading-tight text-zinc-100 sm:text-2xl">One setup. One decision. One lesson.</h2>
+      <p id="launchCoreSummary" class="mt-2 text-sm leading-relaxed text-zinc-300">Eagle Scout is reading the active signal. Choose one.</p>
+      <div class="mt-3 rounded-lg border border-cyan-300/20 bg-cyan-300/10 p-3">
+        <p class="text-[10px] font-bold uppercase text-cyan-100/70">Eagle Scout Verdict</p>
+        <p id="launchCoreVerdict" class="mt-1 text-lg font-black text-cyan-100">Checking setup</p>
+        <p id="launchCoreRule" class="mt-1 text-xs leading-relaxed text-cyan-50/75">Paper trade only if rules clear. Wait or Reject also completes the decision.</p>
+      </div>
+      <div class="mt-3 grid gap-2 sm:grid-cols-3">
+        <button id="launchCorePaperTrade" class="min-h-12 min-w-0 rounded-lg bg-emerald-400 px-2 py-2 text-xs font-black text-zinc-950 hover:bg-emerald-300" type="button">
+          <i class="fa-solid fa-paper-plane mr-1"></i> Paper Trade
+        </button>
+        <button id="launchCoreWaitDecision" class="min-h-12 min-w-0 rounded-lg border border-amber-300/45 bg-amber-300/10 px-2 py-2 text-xs font-black text-amber-100 hover:bg-amber-300/20" type="button">
+          <i class="fa-solid fa-pause mr-1"></i> Wait
+        </button>
+        <button id="launchCoreRejectDecision" class="min-h-12 min-w-0 rounded-lg border border-rose-300/45 bg-rose-300/10 px-2 py-2 text-xs font-black text-rose-100 hover:bg-rose-300/20" type="button">
+          <i class="fa-solid fa-ban mr-1"></i> Reject
+        </button>
       </div>
     </section>
 
@@ -693,7 +736,7 @@
               <h2 id="eagleCommandTitle" class="mt-1 text-3xl font-black text-zinc-100">STRIKEPULSE Decision Room</h2>
                 <p id="eagleCommandSummary" class="mt-2 max-w-3xl text-sm leading-relaxed text-zinc-400">One setup, one decision, one lesson. Start with Eagle Scout, then paper trade or journal the wait/reject decision.</p>
               </div>
-              <div class="flex flex-wrap items-center gap-2">
+              <div id="eagleCommandBadges" class="flex flex-wrap items-center gap-2">
                 <span class="inline-flex items-center gap-2 rounded-full border border-amber-300/30 bg-amber-300/10 px-3 py-1 text-xs font-black text-amber-100"><span class="sp-status-dot"></span> Cockpit Live</span>
                 <span class="rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 text-xs font-black text-cyan-100">Educational Only</span>
                 <span class="rounded-full border border-emerald-300/30 bg-emerald-300/10 px-3 py-1 text-xs font-black text-emerald-100">Paper Mode</span>
@@ -713,6 +756,22 @@
                 <span id="missionMode" class="rounded-full border border-amber-300/30 bg-amber-300/10 px-3 py-1 text-xs font-black text-amber-100">Mission Pending</span>
                 <button id="markMissionStudied" class="rounded-lg border border-cyan-300/40 px-3 py-2 text-xs font-black text-cyan-100 hover:bg-cyan-300/10" type="button">
                   <i class="fa-solid fa-check mr-1"></i> Mark Studied
+                </button>
+              </div>
+            </div>
+
+            <div id="launchDecisionRow" class="mb-3 rounded-lg border border-amber-300/30 bg-zinc-950/85 p-3">
+              <p class="text-[10px] font-bold uppercase text-amber-100/70">Decision</p>
+              <p id="launchDecisionSummary" class="mt-1 text-sm font-black text-zinc-100">Choose Paper Trade, Wait, or Reject to complete this Signal Story.</p>
+              <div class="mt-3 grid grid-cols-3 gap-2">
+                <button id="launchPaperTrade" class="min-h-11 rounded-lg bg-emerald-400 px-2 py-2 text-xs font-black text-zinc-950 hover:bg-emerald-300" type="button">
+                  <i class="fa-solid fa-paper-plane mr-1"></i> Paper Trade
+                </button>
+                <button id="launchWaitDecision" class="min-h-11 rounded-lg border border-amber-300/45 bg-amber-300/10 px-2 py-2 text-xs font-black text-amber-100 hover:bg-amber-300/20" type="button">
+                  <i class="fa-solid fa-pause mr-1"></i> Wait
+                </button>
+                <button id="launchRejectDecision" class="min-h-11 rounded-lg border border-rose-300/45 bg-rose-300/10 px-2 py-2 text-xs font-black text-rose-100 hover:bg-rose-300/20" type="button">
+                  <i class="fa-solid fa-ban mr-1"></i> Reject
                 </button>
               </div>
             </div>
@@ -1574,7 +1633,7 @@
                 </div>
               </div>
               <div class="mt-3 grid gap-3 md:grid-cols-2">
-                <div class="rounded-lg border border-zinc-800 bg-zinc-950/80 p-3">
+                <div id="eagleScoutBenchmarkPanel" class="rounded-lg border border-zinc-800 bg-zinc-950/80 p-3">
                   <p class="text-xs font-bold uppercase text-zinc-500">Supporting Blockers</p>
                   <div id="rejectionBlockers" class="mt-2 flex flex-wrap gap-2"></div>
                 </div>
@@ -3176,7 +3235,7 @@
       </button>
     </section>
 
-    <section class="mt-5 rounded-lg border border-amber-300/25 bg-amber-300/10 p-5">
+    <section class="launch-hidden mt-5 rounded-lg border border-amber-300/25 bg-amber-300/10 p-5">
       <h3 class="flex items-center gap-2 text-lg font-black text-amber-100">
         <i class="fa-solid fa-scale-balanced text-amber-300"></i>
         Risk & Compliance
@@ -3191,7 +3250,7 @@
       </div>
     </section>
 
-    <footer class="mt-5 rounded-lg border border-zinc-800 bg-zinc-950/80 p-4">
+    <footer class="launch-hidden mt-5 rounded-lg border border-zinc-800 bg-zinc-950/80 p-4">
       <div class="flex flex-col gap-3 text-sm text-zinc-400 md:flex-row md:items-center md:justify-between">
         <p>STRIKEPULSE prototype. Educational decision support only.</p>
         <nav class="flex flex-wrap gap-3 font-bold">
@@ -3437,8 +3496,66 @@
       </section>
     </div>
   </div>
+
   <script>
-const symbols = {
+﻿const appConfig = {
+  appName: "STRIKEPULSE",
+  version: "0.1.0-prototype",
+  providerMode: "mock",
+  apiBaseUrl: "http://127.0.0.1:8787",
+  backendEnabled: true,
+  supabase: {
+    enabled: true,
+    url: "https://nllomtyefgmehnwxnjez.supabase.co",
+    anonKey: "sb_publishable_9daUEJG1k5z_6pLyilzekg_1nELR_WB",
+    authMode: "supabase-js",
+    localFallback: true,
+    cloudSyncEnabled: false
+  },
+  pricing: {
+    free: "$0",
+    pro: "$29/mo",
+    eliteAi: "$59/mo",
+    desk: "$149/mo"
+  },
+  features: {
+    aiCopilot: true,
+    phonePush: false,
+    browserNotifications: true,
+    setupRadar: true,
+    privacyMode: true,
+    affiliateStack: true,
+    marketWeather: true,
+    lightningStrikeSystem: true,
+    lightningStrikeAlerts: true
+  },
+  premiumControls: {
+    lightningStrikeAlerts: "pro",
+    eagleScoutEliteLayers: "eliteAi",
+    screenshotAiAnalysis: "eliteAi",
+    tradeReplayArchive: "pro",
+    aiCoach: "eliteAi"
+  },
+  alerts: {
+    defaultNineSigThreshold: 6,
+    cooldownMs: 45000,
+    scanEveryTicks: 5
+  },
+  dataRefresh: {
+    liveTickMs: 3000,
+    enrichEveryTicks: 10,
+    rankingEveryTicks: 4,
+    qualityEveryTicks: 2
+  },
+  compliance: {
+    simulatedData: true,
+    educationalOnly: true,
+    noFinancialAdvice: true,
+    noGuaranteedOutcomes: true
+  }
+};
+
+﻿    const symbols = {
       NVDA: {
         price: 142.87, move: 2.34, target: 158.4, confidence: 87, type: "Bullish", sector: "Semiconductors", risk: "Moderate", stopPct: 0.032, stopType: "VWAP reclaim",
         options: { grade: "A+", liquidity: "Elite", spread: "$0.05", iv: 42, flow: "Calls", setup: "Weekly ATM call after 1m candle holds above VWAP. Avoid entries when spread exceeds $0.10." },
@@ -3716,7 +3833,9 @@ const symbols = {
         ]
       }
     };
-const marketContext = {
+
+
+    const marketContext = {
       spy: { trend: "Bullish", score: 78 },
       qqq: { trend: "Bullish", score: 84 },
       vix: { state: "Calm", score: 74 },
@@ -3744,9 +3863,7 @@ const marketContext = {
 
 
 
-
-﻿import { appConfig } from './config.js';
-
+﻿
     const defaultPreferences = {
       style: "scalp",
       risk: "100",
@@ -6029,6 +6146,33 @@ const marketContext = {
         return;
       }
       openEagleScoutScreenshotCheck();
+    }
+
+    function fillLaunchDecisionJournal(decision) {
+      const note = document.getElementById("journalNote");
+      const outcome = document.getElementById("journalOutcome");
+      const explanation = buildEagleScoutExplanation(activeEagleScoutMarker);
+      const isReject = decision === "Reject";
+      const decisionTag = isReject ? "Rejected" : "Wait";
+      const failedChecks = Array.isArray(explanation.failed) && explanation.failed.length
+        ? explanation.failed.join("; ")
+        : "risk outweighed reward";
+      const noteText = isReject
+        ? `${explanation.title}: Rejected. ${explanation.why} Failed checks: ${failedChecks}.`
+        : `${explanation.title}: Wait. ${explanation.why} Recheck only after cleaner confirmation.`;
+      ensureSignalContext(explanation?.symbol || currentSymbol, "eagleScout");
+      if (outcome) outcome.value = "Skipped";
+      if (note) note.value = noteText;
+      selectedJournalTags = [...new Set([...(selectedJournalTags || []), "Eagle Scout", decisionTag, "Skipped"])];
+      document.querySelectorAll(".journal-tag").forEach(button => {
+        const active = selectedJournalTags.includes(button.dataset.tag);
+        button.className = active
+          ? "journal-tag rounded-full border border-amber-300 bg-amber-300/15 px-3 py-1 text-xs font-bold text-amber-100"
+          : "journal-tag rounded-full border border-zinc-700 px-3 py-1 text-xs font-bold text-zinc-300 hover:bg-zinc-800";
+      });
+      eagleScoutJumpTo("journalNote", "journal");
+      note?.focus();
+      showNeutralToast(`${decision} decision ready to journal`);
     }
 
     function openEagleScoutJournal() {
@@ -9159,6 +9303,9 @@ const marketContext = {
       const primary = document.getElementById("eagleScoutOpenPaper");
       const replay = document.getElementById("eagleScoutOpenReplay");
       const journal = document.getElementById("eagleScoutOpenJournal");
+      const launchSummary = document.getElementById("launchDecisionSummary");
+      const launchCoreVerdict = document.getElementById("launchCoreVerdict");
+      const launchCoreRule = document.getElementById("launchCoreRule");
       const tones = {
         emerald: "border-emerald-300/35 bg-emerald-300/10 text-emerald-100 hover:bg-emerald-300/20",
         rose: "border-rose-300/35 bg-rose-300/10 text-rose-100 hover:bg-rose-300/20",
@@ -9182,6 +9329,17 @@ const marketContext = {
       if (journal) {
         journal.innerHTML = `<i class="fa-solid fa-book-open mr-1"></i> ${plan.journalLabel}`;
         journal.dataset.outcome = plan.journalOutcome;
+      }
+      if (launchSummary) {
+        launchSummary.textContent = `${explanation?.symbol || currentSymbol}: ${explanation?.suggestedAction || "Wait"} read. Choose Paper Trade, Wait, or Reject to finish this Signal Story.`;
+      }
+      if (launchCoreVerdict) {
+        launchCoreVerdict.textContent = `${explanation?.symbol || currentSymbol}: ${explanation?.suggestedAction || "Wait"}`;
+      }
+      if (launchCoreRule) {
+        launchCoreRule.textContent = plan.primaryAction === "paper"
+          ? "Demo paper trade is allowed. Journal the plan next."
+          : `${plan.primaryLabel} is safer. Journal it, then replay.`;
       }
     }
 
@@ -13093,6 +13251,26 @@ const marketContext = {
       paperTradeSignalTicket();
       markStartFlowStep("paper");
     });
+    document.getElementById("launchPaperTrade")?.addEventListener("click", () => {
+      paperTradeSignalTicket();
+      markStartFlowStep("paper");
+    });
+    document.getElementById("launchCorePaperTrade")?.addEventListener("click", () => {
+      paperTradeSignalTicket();
+      markStartFlowStep("paper");
+    });
+    document.getElementById("launchWaitDecision")?.addEventListener("click", () => {
+      fillLaunchDecisionJournal("Wait");
+    });
+    document.getElementById("launchCoreWaitDecision")?.addEventListener("click", () => {
+      fillLaunchDecisionJournal("Wait");
+    });
+    document.getElementById("launchRejectDecision")?.addEventListener("click", () => {
+      fillLaunchDecisionJournal("Reject");
+    });
+    document.getElementById("launchCoreRejectDecision")?.addEventListener("click", () => {
+      fillLaunchDecisionJournal("Reject");
+    });
     document.getElementById("journalSignal").addEventListener("click", () => {
       journalSignalTicket();
       markStartFlowStep("journal");
@@ -13375,7 +13553,7 @@ const marketContext = {
 
     function focusMissionBriefingFirstScreen() {
       if (window.location.hash) return;
-      const mission = document.getElementById("eagleCommandCenter");
+      const mission = document.getElementById("launchCoreMission") || document.getElementById("eagleCommandCenter");
       if (!mission) return;
       requestAnimationFrame(() => {
         mission.scrollIntoView({ behavior: "auto", block: "start" });
@@ -13465,7 +13643,7 @@ const marketContext = {
     }, appConfig.dataRefresh.liveTickMs);
   
 
-  </script>
+</script>
 </body>
 </html>
 
