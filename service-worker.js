@@ -1,4 +1,4 @@
-const CACHE_NAME = "strikepulse-v1-pwa-20260619-launch-mode";
+const CACHE_NAME = "strikepulse-v1-pwa-20260622-premium-mobile";
 const CORE_ASSETS = [
   "./",
   "./index.html",

@@ -68,10 +68,95 @@
         radial-gradient(circle at 90% 0%, var(--sf-accent-2), transparent 30rem),
         var(--sf-bg);
       letter-spacing: .01em;
+      -webkit-font-smoothing: antialiased;
+      overscroll-behavior-y: none;
+    }
+    html {
+      scroll-behavior: smooth;
     }
     button, input, select, textarea { font: inherit; }
     button, select, input, textarea {
       touch-action: manipulation;
+    }
+    button,
+    a,
+    input,
+    select,
+    textarea {
+      -webkit-tap-highlight-color: transparent;
+    }
+    button,
+    [role="button"],
+    .journal-tag,
+    .range {
+      transform: translateZ(0);
+      transition:
+        transform .2s cubic-bezier(.34, 1.56, .64, 1),
+        box-shadow .2s ease,
+        border-color .2s ease,
+        background-color .2s ease,
+        opacity .2s ease;
+      will-change: transform;
+    }
+    button:active,
+    [role="button"]:active,
+    .journal-tag:active,
+    .range:active {
+      transform: scale(.975) translateY(1px);
+    }
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid rgba(0, 229, 255, .7);
+      outline-offset: 3px;
+    }
+    main {
+      animation: sp-page-enter .46s cubic-bezier(.2, .8, .2, 1) both;
+    }
+    main > section,
+    .sp-premium-card,
+    #launchCoreMission,
+    #eagleCommandCenter,
+    #signalReplayPulse,
+    #tradeDnaPanel {
+      transform: translateZ(0);
+      animation: sp-card-enter .52s cubic-bezier(.21, .9, .24, 1) both;
+      transition:
+        transform .24s cubic-bezier(.34, 1.56, .64, 1),
+        box-shadow .24s ease,
+        border-color .24s ease,
+        background-color .24s ease;
+      will-change: transform;
+    }
+    main > section:nth-of-type(2),
+    .sp-premium-card:nth-of-type(2) {
+      animation-delay: .04s;
+    }
+    main > section:nth-of-type(3),
+    .sp-premium-card:nth-of-type(3) {
+      animation-delay: .08s;
+    }
+    #launchCoreMission {
+      box-shadow: 0 18px 46px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(255, 255, 255, .04);
+    }
+    #launchCoreMission button {
+      box-shadow: 0 10px 22px rgba(0, 0, 0, .18);
+    }
+    #launchCoreMission button:active {
+      transform: scale(.985) translateY(1px);
+      box-shadow: 0 5px 12px rgba(0, 0, 0, .22);
+    }
+    #tickerStrip,
+    #queue,
+    #journalList,
+    #signalReplaySelect,
+    .overflow-x-auto,
+    .overflow-auto {
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+      overscroll-behavior: contain;
     }
     h1, h2, h3, .font-black {
       font-family: "Space Grotesk", "Inter Tight", ui-sans-serif, system-ui, sans-serif;
@@ -288,6 +373,161 @@
     body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #launchCoreRule {
       overflow-wrap: anywhere;
     }
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) main {
+      padding-bottom: calc(6.5rem + env(safe-area-inset-bottom));
+    }
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) header {
+      border-color: rgba(255,255,255,.08);
+      background: rgba(5, 10, 24, .82);
+    }
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #launchCoreMission,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #chartPanel,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #eagleScoutExplainPanel,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #tradeDnaPanel,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #signalReplayPulse {
+      border-radius: 1.35rem !important;
+      border-color: rgba(255,255,255,.12);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.055), transparent 44%),
+        rgba(7, 13, 29, .94);
+      box-shadow: 0 22px 58px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #launchCoreMission {
+      padding: 1.1rem;
+      border-color: rgba(0,229,255,.22);
+      box-shadow: 0 24px 70px rgba(0,0,0,.48), 0 0 38px rgba(0,229,255,.07), inset 0 1px 0 rgba(255,255,255,.08);
+    }
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #launchCoreTitle {
+      font-size: clamp(2rem, 11vw, 3.25rem);
+      letter-spacing: 0;
+      line-height: .96;
+    }
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #launchCoreSummary {
+      font-size: 1rem;
+      color: rgba(244,244,245,.82);
+    }
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #launchCoreVerdict {
+      font-size: 1.25rem;
+    }
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #launchCorePaperTrade,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #launchCoreWaitDecision,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #launchCoreRejectDecision {
+      min-height: 3.55rem;
+      border-radius: 1rem;
+      font-size: .95rem;
+      box-shadow: 0 14px 32px rgba(0,0,0,.25);
+    }
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #launchCorePaperTrade {
+      box-shadow: 0 18px 38px rgba(34,255,136,.14);
+    }
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #professionalChartContainer,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #chartShell,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #chartPanel .relative:has(> #chart) {
+      min-height: 28rem;
+      border-radius: 1.25rem !important;
+      touch-action: none;
+    }
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #chartIndicatorBar,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #saveChartLayout,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #loadChartLayout,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #zoomOut,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #zoomIn,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #resetZoom {
+      display: none !important;
+    }
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #launchChartModeStrip,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #signalStoryChartLegend,
+    body[data-launch-mode="true"]:not([data-advanced-mode="true"]) #signalStoryBottomNav {
+      display: flex;
+    }
+    #launchChartModeStrip,
+    #signalStoryChartLegend,
+    #signalStoryBottomNav {
+      display: none;
+    }
+    .launch-range {
+      min-height: 2.55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(24, 31, 48, .82);
+      padding: 0 .95rem;
+      font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+      font-size: .78rem;
+      font-weight: 900;
+      color: rgba(244,244,245,.76);
+    }
+    .launch-range.is-active {
+      border-color: rgba(0,229,255,.58);
+      background: rgba(0,229,255,.13);
+      color: #cffafe;
+      box-shadow: 0 0 24px rgba(0,229,255,.08);
+    }
+    #signalStoryBottomNav {
+      position: fixed;
+      left: .75rem;
+      right: .75rem;
+      bottom: calc(.75rem + env(safe-area-inset-bottom));
+      z-index: 45;
+      align-items: center;
+      justify-content: space-between;
+      gap: .35rem;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 1.25rem;
+      background: rgba(6, 11, 24, .86);
+      padding: .55rem;
+      box-shadow: 0 18px 60px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.08);
+      backdrop-filter: blur(18px);
+    }
+    #signalStoryBottomNav a {
+      display: flex;
+      min-width: 0;
+      flex: 1;
+      flex-direction: column;
+      align-items: center;
+      gap: .2rem;
+      border-radius: .95rem;
+      padding: .55rem .25rem;
+      color: rgba(244,244,245,.72);
+      font-size: .62rem;
+      font-weight: 800;
+      line-height: 1;
+      text-decoration: none;
+    }
+    #signalStoryBottomNav a:first-child {
+      background: rgba(0,229,255,.12);
+      color: #cffafe;
+    }
+    #signalStoryBottomNav i {
+      font-size: .9rem;
+    }
+    #firstUseCoach:not(.hidden) {
+      display: flex;
+    }
+    #firstUseCoach section {
+      width: min(100%, calc(100vw - 1.5rem));
+      max-width: 20rem;
+    }
+    #firstUseCoach h2,
+    #firstUseCoach p {
+      overflow-wrap: anywhere;
+    }
+    #firstUseCoach .grid {
+      min-width: 0;
+    }
+    #firstUseCoach .coach-choice {
+      min-width: 0;
+    }
+    @media (max-width: 430px) {
+      #firstUseCoach .grid-cols-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+    .coach-choice.is-selected {
+      border-color: rgba(0,229,255,.72) !important;
+      background: rgba(0,229,255,.12) !important;
+      color: #ecfeff !important;
+      box-shadow: 0 0 24px rgba(0,229,255,.1);
+    }
     .sf-shield { fill: var(--sf-logo-shield); }
     .sf-wing { fill: var(--sf-logo-wing); }
     .sf-beak { fill: var(--sf-logo-beak); }
@@ -439,12 +679,23 @@
       82% { opacity: .5; }
       100% { transform: translateX(100%); opacity: 0; }
     }
+    @keyframes sp-page-enter {
+      from { opacity: 0; transform: translateY(10px) scale(.992); filter: blur(3px); }
+      to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+    @keyframes sp-card-enter {
+      from { opacity: 0; transform: translateY(14px) scale(.985); }
+      70% { opacity: 1; transform: translateY(-1px) scale(1.002); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
     @media (prefers-reduced-motion: reduce) {
-      .sp-premium-card::before,
-      .eagle-meter-fill::after,
-      .eagle-lightning-marker,
-      .setup-tape-track {
-        animation: none;
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
       }
     }
     @keyframes command-meter-sweep {
@@ -526,6 +777,37 @@
       STRIKEPULSE needs JavaScript enabled to render charts, alerts, simulated trading, and setup scoring.
     </div>
   </noscript>
+  <div id="firstUseCoach" class="hidden fixed inset-0 z-[70] items-end bg-black/80 p-3 backdrop-blur-md sm:items-center">
+    <section class="mx-auto w-full max-w-md overflow-hidden rounded-[1.5rem] border border-cyan-200/15 bg-zinc-950 shadow-2xl shadow-black/60">
+      <div class="border-b border-white/10 bg-cyan-300/10 p-5">
+        <p class="text-[11px] font-black uppercase tracking-[0.16em] text-cyan-100/70">First Signal Story</p>
+        <h2 class="mt-2 text-3xl font-black leading-none text-white">Build one calm trading decision.</h2>
+        <p class="mt-3 text-sm leading-relaxed text-zinc-300">STRIKEPULSE is a trading decision coach. It helps you review one setup, choose Demo Trade, Wait, or Reject, then save the lesson for tomorrow.</p>
+      </div>
+      <div class="space-y-4 p-5">
+        <div>
+          <p class="text-xs font-black uppercase text-zinc-500">Trading style</p>
+          <div class="mt-2 grid grid-cols-3 gap-2">
+            <button class="coach-choice is-selected rounded-xl border border-cyan-300/40 bg-cyan-300/10 px-2 py-3 text-xs font-black text-cyan-100" data-coach-style="scalp" type="button">Scalp</button>
+            <button class="coach-choice rounded-xl border border-zinc-700 bg-zinc-900 px-2 py-3 text-xs font-black text-zinc-300" data-coach-style="day" type="button">Day</button>
+            <button class="coach-choice rounded-xl border border-zinc-700 bg-zinc-900 px-2 py-3 text-xs font-black text-zinc-300" data-coach-style="swing" type="button">Swing</button>
+          </div>
+        </div>
+        <div>
+          <p class="text-xs font-black uppercase text-zinc-500">Analysis depth</p>
+          <div class="mt-2 grid grid-cols-2 gap-2">
+            <button class="coach-choice is-selected rounded-xl border border-cyan-300/40 bg-cyan-300/10 px-3 py-3 text-xs font-black text-cyan-100" data-coach-depth="beginner" type="button">Beginner</button>
+            <button class="coach-choice rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-3 text-xs font-black text-zinc-300" data-coach-depth="advanced" type="button">Advanced</button>
+          </div>
+        </div>
+        <div class="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-4">
+          <p class="text-sm font-black text-emerald-100">Wait and Reject count as wins.</p>
+          <p class="mt-1 text-xs leading-relaxed text-emerald-50/75">A good day is following your rule, not forcing a trade.</p>
+        </div>
+        <button id="firstUseStart" class="h-14 w-full rounded-2xl bg-cyan-300 text-sm font-black text-zinc-950 shadow-lg shadow-cyan-950/40" type="button">Start Today's Setup</button>
+      </div>
+    </section>
+  </div>
   <header class="sticky top-0 z-40 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur">
     <div class="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-3 sm:gap-4 sm:px-6">
       <div class="flex min-w-0 items-center gap-3">
@@ -644,17 +926,17 @@
     </section>
 
     <section id="launchCoreMission" class="mb-5 overflow-hidden rounded-lg border border-amber-300/30 bg-zinc-950/90 p-4">
-      <p class="text-[11px] font-black uppercase tracking-[0.16em] text-amber-100/75">Mission Briefing</p>
+      <p class="text-[11px] font-black uppercase tracking-[0.16em] text-amber-100/75">Today's Setup</p>
       <h2 id="launchCoreTitle" class="mt-1 text-xl font-black leading-tight text-zinc-100 sm:text-2xl">One setup. One decision. One lesson.</h2>
-      <p id="launchCoreSummary" class="mt-2 text-sm leading-relaxed text-zinc-300">Eagle Scout is reading the active signal. Choose one.</p>
+      <p id="launchCoreSummary" class="mt-2 text-sm leading-relaxed text-zinc-300">Review this setup. Choose one.</p>
       <div class="mt-3 rounded-lg border border-cyan-300/20 bg-cyan-300/10 p-3">
-        <p class="text-[10px] font-bold uppercase text-cyan-100/70">Eagle Scout Verdict</p>
-        <p id="launchCoreVerdict" class="mt-1 text-lg font-black text-cyan-100">Checking setup</p>
-        <p id="launchCoreRule" class="mt-1 text-xs leading-relaxed text-cyan-50/75">Paper trade only if rules clear. Wait or Reject also completes the decision.</p>
+        <p class="text-[10px] font-bold uppercase text-cyan-100/70">Setup Read</p>
+        <p id="launchCoreVerdict" class="mt-1 text-lg font-black text-cyan-100">Review before acting</p>
+        <p id="launchCoreRule" class="mt-1 text-xs leading-relaxed text-cyan-50/75">Clear setup? Demo trade. Not clear? Wait or reject.</p>
       </div>
       <div class="mt-3 grid gap-2 sm:grid-cols-3">
         <button id="launchCorePaperTrade" class="min-h-12 min-w-0 rounded-lg bg-emerald-400 px-2 py-2 text-xs font-black text-zinc-950 hover:bg-emerald-300" type="button">
-          <i class="fa-solid fa-paper-plane mr-1"></i> Paper Trade
+          <i class="fa-solid fa-paper-plane mr-1"></i> Demo Trade
         </button>
         <button id="launchCoreWaitDecision" class="min-h-12 min-w-0 rounded-lg border border-amber-300/45 bg-amber-300/10 px-2 py-2 text-xs font-black text-amber-100 hover:bg-amber-300/20" type="button">
           <i class="fa-solid fa-pause mr-1"></i> Wait
@@ -677,6 +959,18 @@
             <button data-range="5m" class="range h-12 rounded-lg border border-zinc-700 bg-zinc-900 px-4 text-sm font-black text-zinc-300">5m</button>
             <button data-range="15m" class="range h-12 rounded-lg border border-zinc-700 bg-zinc-900 px-4 text-sm font-black text-zinc-300">15m</button>
             <button data-range="1h" class="range h-12 rounded-lg border border-zinc-700 bg-zinc-900 px-4 text-sm font-black text-zinc-300">1h</button>
+          </div>
+        </div>
+        <div id="launchChartModeStrip" class="mb-3 items-center justify-between gap-3 rounded-2xl border border-cyan-300/15 bg-zinc-950/80 p-2">
+          <div class="min-w-0 px-2">
+            <p class="text-[10px] font-black uppercase tracking-[0.14em] text-cyan-100/60">Beginner chart</p>
+            <p class="text-xs font-bold text-zinc-300">Price, setup zone, risk zone, decision marker.</p>
+          </div>
+          <div class="flex shrink-0 gap-1">
+            <button data-range="1m" class="launch-range is-active" type="button">1m</button>
+            <button data-range="5m" class="launch-range" type="button">5m</button>
+            <button data-range="15m" class="launch-range" type="button">15m</button>
+            <button data-range="1h" class="launch-range" type="button">1h</button>
           </div>
         </div>
 
@@ -732,9 +1026,9 @@
           <div class="border-b border-amber-300/10 bg-zinc-900/80 p-4">
             <div class="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
               <div>
-                <p class="text-[11px] font-black uppercase tracking-[0.18em] text-amber-200">Eagle Scout Command Center</p>
-              <h2 id="eagleCommandTitle" class="mt-1 text-3xl font-black text-zinc-100">STRIKEPULSE Decision Room</h2>
-                <p id="eagleCommandSummary" class="mt-2 max-w-3xl text-sm leading-relaxed text-zinc-400">One setup, one decision, one lesson. Start with Eagle Scout, then paper trade or journal the wait/reject decision.</p>
+                <p class="text-[11px] font-black uppercase tracking-[0.18em] text-amber-200">Setup Coach</p>
+              <h2 id="eagleCommandTitle" class="mt-1 text-3xl font-black text-zinc-100">Decision Coach</h2>
+                <p id="eagleCommandSummary" class="mt-2 max-w-3xl text-sm leading-relaxed text-zinc-400">One setup, one decision, one lesson. Review the setup, then choose demo trade, wait, or reject.</p>
               </div>
               <div id="eagleCommandBadges" class="flex flex-wrap items-center gap-2">
                 <span class="inline-flex items-center gap-2 rounded-full border border-amber-300/30 bg-amber-300/10 px-3 py-1 text-xs font-black text-amber-100"><span class="sp-status-dot"></span> Cockpit Live</span>
@@ -748,7 +1042,7 @@
           <div class="border-b border-zinc-800/80 p-4">
             <div class="mb-3 flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
               <div>
-                <p class="text-[11px] font-black uppercase tracking-[0.16em] text-cyan-100/70">Daily Mission Briefing</p>
+                <p class="text-[11px] font-black uppercase tracking-[0.16em] text-cyan-100/70">Today's Setup</p>
                 <h3 id="missionStatus" class="mt-1 text-2xl font-black text-zinc-100">Preparing mission</h3>
                 <p id="missionObjective" class="mt-1 max-w-3xl text-sm leading-relaxed text-zinc-400">STRIKEPULSE is assembling weather, opportunity, danger, replay, and discipline context.</p>
               </div>
@@ -762,10 +1056,10 @@
 
             <div id="launchDecisionRow" class="mb-3 rounded-lg border border-amber-300/30 bg-zinc-950/85 p-3">
               <p class="text-[10px] font-bold uppercase text-amber-100/70">Decision</p>
-              <p id="launchDecisionSummary" class="mt-1 text-sm font-black text-zinc-100">Choose Paper Trade, Wait, or Reject to complete this Signal Story.</p>
+              <p id="launchDecisionSummary" class="mt-1 text-sm font-black text-zinc-100">Choose demo trade, wait, or reject to complete this story.</p>
               <div class="mt-3 grid grid-cols-3 gap-2">
                 <button id="launchPaperTrade" class="min-h-11 rounded-lg bg-emerald-400 px-2 py-2 text-xs font-black text-zinc-950 hover:bg-emerald-300" type="button">
-                  <i class="fa-solid fa-paper-plane mr-1"></i> Paper Trade
+                  <i class="fa-solid fa-paper-plane mr-1"></i> Demo Trade
                 </button>
                 <button id="launchWaitDecision" class="min-h-11 rounded-lg border border-amber-300/45 bg-amber-300/10 px-2 py-2 text-xs font-black text-amber-100 hover:bg-amber-300/20" type="button">
                   <i class="fa-solid fa-pause mr-1"></i> Wait
@@ -1405,6 +1699,13 @@
             <svg id="eagleChartOverlay" class="pointer-events-none absolute inset-0 z-[5] h-full w-full" preserveAspectRatio="none" role="group" aria-label="Eagle Scout explainable chart markers"></svg>
             <div id="chartEngineLabel" class="pointer-events-none absolute bottom-3 right-3 z-10 rounded-lg border border-cyan-300/20 bg-zinc-950/75 px-3 py-1 text-[10px] font-black uppercase text-cyan-100 backdrop-blur">Canvas fallback</div>
           </div>
+          <div id="signalStoryChartLegend" class="mt-3 flex-wrap gap-2 text-[11px] font-black">
+            <span class="rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-2 text-cyan-100">Setup zone</span>
+            <span class="rounded-full border border-rose-300/30 bg-rose-300/10 px-3 py-2 text-rose-100">Risk zone</span>
+            <span class="rounded-full border border-emerald-300/30 bg-emerald-300/10 px-3 py-2 text-emerald-100">Decision point</span>
+            <span class="rounded-full border border-amber-300/30 bg-amber-300/10 px-3 py-2 text-amber-100">Journal point</span>
+            <span class="rounded-full border border-indigo-300/30 bg-indigo-300/10 px-3 py-2 text-indigo-100">Lesson marker</span>
+          </div>
 
           <section id="eagleScoutExplainPanel" class="sp-premium-card mt-4 rounded-lg border border-amber-300/25 bg-zinc-950/90 p-4">
             <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
@@ -2035,7 +2336,7 @@
       </div>
 
       <aside class="space-y-5">
-        <section class="rounded-lg border border-zinc-800 bg-zinc-900/95 p-4">
+        <section id="journalPanel" class="rounded-lg border border-zinc-800 bg-zinc-900/95 p-4">
           <div class="mb-3 flex items-center justify-between">
             <h3 class="font-black">Signal Queue</h3>
             <span class="rounded-full bg-zinc-800 px-2 py-1 text-xs text-zinc-400">Live scan</span>
@@ -2629,18 +2930,18 @@
           <div class="mb-3 flex items-center justify-between gap-3">
             <h3 class="flex items-center gap-2 font-black">
               <i class="fa-solid fa-book-open text-cyan-300"></i>
-              Trade Journal
+              Journal This Decision
             </h3>
             <button id="clearJournal" class="rounded-lg border border-zinc-700 px-2 py-1 text-xs font-bold text-zinc-400 hover:bg-zinc-800">Clear</button>
           </div>
 
           <div class="mb-3 rounded-lg border border-blue-300/25 bg-blue-300/10 p-3">
-            <p class="text-[10px] font-bold uppercase text-blue-100/70">Pilot Journal Reminder</p>
+            <p class="text-[10px] font-bold uppercase text-blue-100/70">Decision Note</p>
             <p id="journalPilotReminder" class="mt-1 text-xs leading-relaxed text-blue-50/80">Write the reason for your decision. Confirm, Wait, and Reject all teach STRIKEPULSE what to remember.</p>
-            <p id="journalStoryStatus" class="mt-2 text-xs font-bold leading-relaxed text-blue-50/80">Signal Story: journal will attach to the active Signal ID.</p>
+            <p id="journalStoryStatus" class="mt-2 text-xs font-bold leading-relaxed text-blue-50/80">This note becomes the lesson for replay.</p>
           </div>
 
-          <textarea id="journalNote" rows="3" placeholder="Quick note: why this trade, what confirms it, what would make you skip..." class="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-950 p-3 text-sm outline-none focus:border-cyan-400"></textarea>
+          <textarea id="journalNote" rows="3" placeholder="Why did you choose this?" class="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-950 p-3 text-sm outline-none focus:border-cyan-400"></textarea>
           <p class="mt-2 text-[11px] leading-relaxed text-zinc-500">Journal notes stay local in this prototype. Emails, phone-like numbers, SSNs, and card-like numbers are redacted before saving.</p>
 
           <div class="mt-3">
@@ -2785,24 +3086,24 @@
           <div id="replayOutcomeLibraryPanel" class="mt-4 rounded-lg border border-sky-400/25 bg-sky-400/10 p-3">
             <div class="mb-3 flex items-start justify-between gap-3">
               <div>
-                <p class="text-xs font-black uppercase text-sky-100">Replay Outcome Library</p>
-                <p id="replayOutcomeSummary" class="mt-1 text-[11px] leading-relaxed text-sky-100/70">Local learning examples grouped by wins, failures, rejections, Lightning events, and Graveyard warnings.</p>
+                <p class="text-xs font-black uppercase text-sky-100">Replay the Lesson</p>
+                <p id="replayOutcomeSummary" class="mt-1 text-[11px] leading-relaxed text-sky-100/70">Review what happened so tomorrow's decision gets clearer.</p>
               </div>
               <span id="replayOutcomeCount" class="shrink-0 rounded-full border border-sky-300/30 bg-zinc-950/70 px-2 py-1 text-[11px] font-black text-sky-100">0 examples</span>
             </div>
             <div id="replayOutcomeBuckets" class="grid gap-2 md:grid-cols-3"></div>
             <div class="mt-3 rounded-lg border border-zinc-800 bg-zinc-950/80 p-2">
-              <p class="text-[11px] font-bold uppercase text-zinc-500">Learning Rule</p>
-              <p id="replayOutcomeLesson" class="mt-1 text-xs leading-relaxed text-zinc-300">Build the sample by replaying signals, closing paper trades, journaling outcomes, and reviewing rejected setups.</p>
+              <p class="text-[11px] font-bold uppercase text-zinc-500">Lesson</p>
+              <p id="replayOutcomeLesson" class="mt-1 text-xs leading-relaxed text-zinc-300">Replay one decision. Keep one lesson.</p>
             </div>
           </div>
 
           <div id="tradeDnaPanel" class="mt-4 rounded-lg border border-cyan-400/25 bg-cyan-400/10 p-3">
             <div class="mb-3 flex items-start justify-between gap-3">
               <div>
-                <p class="text-xs font-black uppercase text-cyan-100">Eagle DNA</p>
-                <p id="tradeDnaSummary" class="mt-1 text-[11px] leading-relaxed text-cyan-100/70">Trade DNA learns what setups you handle best after each journal and replay.</p>
-                <p id="tradeDnaStoryStatus" class="mt-2 text-xs font-bold leading-relaxed text-cyan-50/80">Signal Story: lesson status will appear after journal or replay.</p>
+                <p class="text-xs font-black uppercase text-cyan-100">Your Trading Pattern</p>
+                <p id="tradeDnaSummary" class="mt-1 text-[11px] leading-relaxed text-cyan-100/70">STRIKEPULSE learns how you decide after each journal and replay.</p>
+                <p id="tradeDnaStoryStatus" class="mt-2 text-xs font-bold leading-relaxed text-cyan-50/80">Your lesson appears after journal or replay.</p>
               </div>
               <span id="tradeDnaScore" class="shrink-0 rounded-full border border-cyan-300/30 bg-zinc-950/70 px-2 py-1 text-[11px] font-black text-cyan-100">Learning</span>
             </div>
@@ -2816,7 +3117,7 @@
                 <p id="tradeDnaWorstSetup" class="mt-1 text-xs font-black text-zinc-100">--</p>
               </div>
               <div class="rounded-lg border border-zinc-800 bg-zinc-950/80 p-2">
-                <p class="text-[11px] font-bold uppercase text-zinc-500">Win Rate / Avg Gain</p>
+              <p class="text-[11px] font-bold uppercase text-zinc-500">Clean Decisions</p>
                 <p id="tradeDnaBestTime" class="mt-1 text-xs font-black text-zinc-100">--</p>
               </div>
               <div class="rounded-lg border border-zinc-800 bg-zinc-950/80 p-2">
@@ -2842,28 +3143,28 @@
                 <div id="tradeDnaFixes" class="mt-2 flex flex-wrap gap-1"></div>
               </div>
             </div>
-            <div class="mt-3 rounded-lg border border-zinc-800 bg-zinc-950/80 p-2">
-              <p class="text-[11px] font-bold uppercase text-zinc-500">Eagle DNA Coach</p>
-              <p id="tradeDnaRecommendation" class="mt-1 text-xs leading-relaxed text-zinc-300">Log several paper trades and completed journal outcomes to reveal your edge.</p>
+            <div id="tomorrowMissionPanel" class="mt-3 rounded-lg border border-zinc-800 bg-zinc-950/80 p-2">
+              <p class="text-[11px] font-bold uppercase text-zinc-500">Next Rule</p>
+              <p id="tradeDnaRecommendation" class="mt-1 text-xs leading-relaxed text-zinc-300">Complete more decisions to reveal your pattern.</p>
             </div>
           </div>
 
           <div class="sp-premium-card mt-4 rounded-lg border border-indigo-400/25 bg-indigo-400/10 p-3">
             <div class="mb-3 flex items-center justify-between gap-3">
               <div>
-                <p class="text-xs font-black uppercase text-indigo-100">Signal Replay</p>
-                <p class="mt-1 text-[11px] leading-relaxed text-indigo-100/70">Review any saved signal against what actually happened.</p>
+                <p class="text-xs font-black uppercase text-indigo-100">Replay the Lesson</p>
+                <p class="mt-1 text-[11px] leading-relaxed text-indigo-100/70">Review what happened after your decision.</p>
               </div>
               <span id="signalReplayStatus" class="shrink-0 rounded-full border border-indigo-300/30 bg-zinc-950/70 px-2 py-1 text-[11px] font-black text-indigo-100">Ready</span>
             </div>
             <div id="signalReplayPulse" class="mb-3 rounded-lg border border-indigo-300/25 bg-zinc-950/80 p-3">
               <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p class="sp-kicker text-indigo-100/70">Replay Lesson</p>
-                  <p id="signalReplayPulseTitle" class="mt-1 text-sm font-black text-indigo-100">Replay the same Signal Story</p>
-                  <p id="signalReplayStoryStatus" class="mt-2 text-xs font-bold leading-relaxed text-indigo-50/80">Signal Story: replay must match the active Signal ID.</p>
+                  <p class="sp-kicker text-indigo-100/70">Lesson</p>
+                  <p id="signalReplayPulseTitle" class="mt-1 text-sm font-black text-indigo-100">Replay this decision</p>
+                  <p id="signalReplayStoryStatus" class="mt-2 text-xs font-bold leading-relaxed text-indigo-50/80">Replay should match the decision you just saved.</p>
                 </div>
-                <p id="signalReplayPulseAction" class="text-xs font-bold leading-relaxed text-indigo-50/75">Replay shows what happened after your decision so Trade DNA can learn the lesson.</p>
+                <p id="signalReplayPulseAction" class="text-xs font-bold leading-relaxed text-indigo-50/75">Replay shows what happened so tomorrow's rule gets clearer.</p>
               </div>
             </div>
             <div class="mb-3 flex flex-wrap gap-1" data-quick-feedback-area="Replay"></div>
@@ -3393,6 +3694,14 @@
       </section>
     </div>
   </div>
+
+  <nav id="signalStoryBottomNav" aria-label="Signal Story steps">
+    <a href="#launchCoreMission" aria-label="Today's Setup"><i class="fa-solid fa-bullseye"></i><span>Setup</span></a>
+    <a href="#chartPanel" aria-label="Decision"><i class="fa-solid fa-check"></i><span>Decide</span></a>
+    <a href="#journalPanel" aria-label="Journal"><i class="fa-solid fa-book-open"></i><span>Journal</span></a>
+    <a href="#signalReplayPulse" aria-label="Lesson Replay"><i class="fa-solid fa-rotate"></i><span>Replay</span></a>
+    <a href="#tomorrowMissionPanel" aria-label="Tomorrow Mission"><i class="fa-solid fa-arrow-right"></i><span>Tomorrow</span></a>
+  </nav>
 
   <div id="prefsModal" class="hidden fixed inset-0 z-50 bg-black/75 p-3">
     <div class="flex min-h-full items-end justify-center md:items-center">
@@ -4042,7 +4351,7 @@
       { id: "ticket", label: "Open Signal Ticket", detail: "Use the Quality Gate, rejection logic, Eagle Score, and Lightning readout.", target: "qualityGate", next: "Review the Signal Ticket before making any paper decision." },
       { id: "paper", label: "Demo paper decision", detail: "Use fake demo money, or reject/wait when blockers are present.", target: "paperTradeSignal", next: "Use demo money only if the setup clears your rules." },
       { id: "journal", label: "Journal the decision", detail: "Save why you confirmed, waited, skipped, or rejected the setup.", target: "journalNote", next: "Journal the decision so Proof Engine can learn from it." },
-      { id: "replay", label: "Replay the lesson", detail: "Review candle-by-candle proof after a journal or demo outcome exists.", target: "signalReplaySelect", next: "Replay the saved signal, then let Trade DNA store the lesson." }
+      { id: "replay", label: "Replay the lesson", detail: "Review what happened after a journal or demo outcome exists.", target: "signalReplaySelect", next: "Replay the saved decision, then store the lesson." }
     ];
 
     function money(value) { return "$" + value.toFixed(2); }
@@ -4571,6 +4880,41 @@
       showNeutralToast("Preferences saved");
     }
 
+    function persistCoachPreferences() {
+      localStorage.setItem("strikepulsePreferences", JSON.stringify(userPreferences));
+      renderPreferences();
+      applyPreferences();
+    }
+
+    function selectedCoachValue(name, fallback) {
+      return document.querySelector(`.coach-choice.is-selected[data-coach-${name}]`)?.dataset[`coach${name[0].toUpperCase()}${name.slice(1)}`] || fallback;
+    }
+
+    function initializeFirstUseCoach() {
+      const coach = document.getElementById("firstUseCoach");
+      if (!coach) return;
+      coach.querySelectorAll(".coach-choice").forEach(button => {
+        button.addEventListener("click", () => {
+          const group = button.dataset.coachStyle ? "coachStyle" : "coachDepth";
+          coach.querySelectorAll(`[data-${group.replace(/[A-Z]/g, match => `-${match.toLowerCase()}`)}]`).forEach(item => item.classList.remove("is-selected"));
+          button.classList.add("is-selected");
+        });
+      });
+      document.getElementById("firstUseStart")?.addEventListener("click", () => {
+        userPreferences.style = selectedCoachValue("style", userPreferences.style || "scalp");
+        userPreferences.risk = userPreferences.risk || "100";
+        userPreferences.onboarded = true;
+        localStorage.setItem("strikepulseAnalysisDepth", selectedCoachValue("depth", "beginner"));
+        persistCoachPreferences();
+        coach.classList.add("hidden");
+        focusMissionBriefingFirstScreen({ force: true });
+        showNeutralToast("Today's setup is ready");
+      });
+      if (!userPreferences.onboarded) {
+        coach.classList.remove("hidden");
+      }
+    }
+
     function updateDataHealth(started, ok) {
       dataHealth.provider = dataAdapter.name;
       dataHealth.latency = Math.max(1, Math.round(performance.now() - started));
@@ -4858,7 +5202,7 @@
         return {
           signalId: activeSignalContext.signalId,
           status: "Replay Reviewed",
-          next: "Open Trade DNA to confirm what STRIKEPULSE learned.",
+          next: "Open Your Trading Pattern to confirm the lesson.",
           tone: "indigo"
         };
       }
@@ -4873,7 +5217,7 @@
       if (story?.paperTradeOpened) {
         return {
           signalId: activeSignalContext.signalId,
-          status: "Demo Paper Trade Attached",
+          status: "Demo Trade Attached",
           next: "Close or journal the demo decision so STRIKEPULSE can learn.",
           tone: "amber"
         };
@@ -4888,7 +5232,7 @@
               : "Journal the wait decision. Waiting is a completed decision.";
         return {
           signalId: activeSignalContext.signalId,
-          status: "Eagle Scout Reviewed",
+          status: "Setup Reviewed",
           next,
           tone: action === "Confirm" ? "emerald" : action === "Reject" ? "rose" : action === "Replay" ? "indigo" : "amber"
         };
@@ -4897,7 +5241,7 @@
         return {
           signalId: activeSignalContext.signalId,
           status: "Mission Briefed",
-          next: "Open Eagle Scout to choose Confirm, Wait, Reject, or Replay First.",
+          next: "Open the setup coach to choose demo trade, wait, reject, or replay first.",
           tone: "cyan"
         };
       }
@@ -4962,7 +5306,7 @@
       trust.className = `w-fit rounded-full border bg-zinc-950/70 px-3 py-1 text-xs font-black ${readout.tone === "emerald" ? "border-emerald-300/30 text-emerald-100" : readout.tone === "rose" ? "border-rose-300/30 text-rose-100" : readout.tone === "indigo" ? "border-indigo-300/30 text-indigo-100" : "border-amber-300/30 text-amber-100"}`;
       const loopSteps = [
         { label: "Mission", value: `${payload.weather?.label || getMarketWeather(currentSymbol).label} weather`, target: "dailyCommandCenter", active: true },
-        { label: "Eagle Scout", value: `${gate.verdict} · ${lightning.verdict.replace("⚡ ", "")}`, target: "eagleScoutExplainPanel", active: ["Confirm", "Wait"].includes(readout.verdict) },
+        { label: "Setup Coach", value: `${gate.verdict} · ${lightning.verdict.replace("⚡ ", "")}`, target: "eagleScoutExplainPanel", active: ["Confirm", "Wait"].includes(readout.verdict) },
         { label: "Decision", value: readout.verdict, target: readout.verdict === "Reject" ? "journalNote" : "paperTradeSignal", active: true },
         { label: "Learn", value: readout.verdict === "Replay First" ? "Replay now" : "Journal, then replay", target: readout.verdict === "Replay First" ? "signalReplaySelect" : "journalNote", active: true }
       ];
@@ -6237,8 +6581,9 @@
       const tone = chartConfidenceTone(data.confidence || 0);
       const bullish = data.type === "Bullish";
       const parts = [];
+      const beginnerChart = isBeginnerLaunchChart();
 
-      if (eagleScoutLayers.heatmap) {
+      if (!beginnerChart && eagleScoutLayers.heatmap) {
         const bands = 8;
         for (let index = 0; index < bands; index += 1) {
           const confidenceRamp = ((index + 1) / bands) * ((data.confidence || 0) / 100);
@@ -6251,27 +6596,27 @@
         if (!path) return;
         parts.push(`<path d="${path}" fill="none" stroke="${color}" stroke-opacity="${opacity}" stroke-width="${width}" ${dash ? `stroke-dasharray="${dash}"` : ""}></path>`);
       };
-      addPath(eagleScoutLayers.ema9 ? svgLinePath(visibleIndicators.ema9, xFor, yFor) : "", "#00E5FF", 1.8, .92);
-      addPath(eagleScoutLayers.ema21 ? svgLinePath(visibleIndicators.ema21, xFor, yFor) : "", "#1E5EFF", 1.8, .92);
-      addPath(eagleScoutLayers.sma50 ? svgLinePath(visibleIndicators.sma50, xFor, yFor) : "", "#B8C2CC", 1.8, .86, "6 4");
-      if (eagleScoutLayers.bollinger) {
+      addPath(!beginnerChart && eagleScoutLayers.ema9 ? svgLinePath(visibleIndicators.ema9, xFor, yFor) : "", "#00E5FF", 1.8, .92);
+      addPath(!beginnerChart && eagleScoutLayers.ema21 ? svgLinePath(visibleIndicators.ema21, xFor, yFor) : "", "#1E5EFF", 1.8, .92);
+      addPath(!beginnerChart && eagleScoutLayers.sma50 ? svgLinePath(visibleIndicators.sma50, xFor, yFor) : "", "#B8C2CC", 1.8, .86, "6 4");
+      if (!beginnerChart && eagleScoutLayers.bollinger) {
         addPath(svgBandPath(visibleIndicators.bollinger, xFor, yFor, "upper"), "#B8C2CC", 1.2, .62, "4 5");
         addPath(svgBandPath(visibleIndicators.bollinger, xFor, yFor, "lower"), "#B8C2CC", 1.2, .62, "4 5");
       }
 
-      if (eagleScoutLayers.zones) {
+      if (eagleScoutLayers.zones || beginnerChart) {
         const support = bullish ? Math.min(data.price, averageClose, ...shown.slice(-12).map(candle => candle.low)) : data.target;
         const resistance = bullish ? data.target : Math.max(data.price, averageClose, ...shown.slice(-12).map(candle => candle.high));
         const zoneHeight = Math.max(16, plotH * .045);
         const supportY = Math.max(pad.top, Math.min(pad.top + plotH - zoneHeight, yFor(support) - zoneHeight / 2));
         const resistanceY = Math.max(pad.top, Math.min(pad.top + plotH - zoneHeight, yFor(resistance) - zoneHeight / 2));
-        parts.push(`<rect x="${pad.left}" y="${supportY}" width="${plotW}" height="${zoneHeight}" rx="6" fill="#22FF88" opacity=".10" stroke="#22FF88" stroke-opacity=".34" stroke-dasharray="5 5"></rect>`);
-        parts.push(`<text x="${pad.left + 10}" y="${supportY + zoneHeight - 5}" fill="#B7FFD5" font-size="10" font-family="IBM Plex Mono, Consolas, monospace" font-weight="800">SUPPORT ${priceLabel(support)}</text>`);
-        parts.push(`<rect x="${pad.left}" y="${resistanceY}" width="${plotW}" height="${zoneHeight}" rx="6" fill="#B8C2CC" opacity=".10" stroke="#B8C2CC" stroke-opacity=".36" stroke-dasharray="5 5"></rect>`);
-        parts.push(`<text x="${pad.left + 10}" y="${resistanceY + zoneHeight - 5}" fill="#D8E0E8" font-size="10" font-family="IBM Plex Mono, Consolas, monospace" font-weight="800">RESISTANCE ${priceLabel(resistance)}</text>`);
+        parts.push(`<rect x="${pad.left}" y="${supportY}" width="${plotW}" height="${zoneHeight}" rx="6" fill="#00E5FF" opacity=".10" stroke="#00E5FF" stroke-opacity=".38" stroke-dasharray="5 5"></rect>`);
+        parts.push(`<text x="${pad.left + 10}" y="${supportY + zoneHeight - 5}" fill="#CFFAFE" font-size="10" font-family="IBM Plex Mono, Consolas, monospace" font-weight="800">SETUP ZONE ${priceLabel(support)}</text>`);
+        parts.push(`<rect x="${pad.left}" y="${resistanceY}" width="${plotW}" height="${zoneHeight}" rx="6" fill="#FF4D4D" opacity=".10" stroke="#FF4D4D" stroke-opacity=".36" stroke-dasharray="5 5"></rect>`);
+        parts.push(`<text x="${pad.left + 10}" y="${resistanceY + zoneHeight - 5}" fill="#FFD6D6" font-size="10" font-family="IBM Plex Mono, Consolas, monospace" font-weight="800">RISK ZONE ${priceLabel(resistance)}</text>`);
       }
 
-      if (eagleScoutLayers.lightning) {
+      if (!beginnerChart && eagleScoutLayers.lightning) {
         const gate = getQualityGate(data);
         const rejection = evaluateTradeRejection(data, gate, activeChartSymbol());
         const lightning = tradeReplayState.chartLinked
@@ -6294,22 +6639,28 @@
       const markerGate = getQualityGate(data);
       const markerRejection = evaluateTradeRejection(data, markerGate, activeChartSymbol());
       const markerIndex = Math.max(1, shown.length - 5);
-      if (eagleScoutLayers.aPlus && data.confidence >= 85 && markerGate.verdict !== "FAIL") {
-        parts.push(chartMarkerBadge(xFor(markerIndex), yFor(shown[markerIndex].high) - 18, "A+ SETUP", "#22FF88", "#B7FFD5", "aPlus"));
+      if ((beginnerChart || eagleScoutLayers.aPlus) && data.confidence >= 85 && markerGate.verdict !== "FAIL") {
+        parts.push(chartMarkerBadge(xFor(markerIndex), yFor(shown[markerIndex].high) - 18, beginnerChart ? "DECISION POINT" : "A+ SETUP", "#22FF88", "#B7FFD5", "aPlus"));
       }
-      if (eagleScoutLayers.reject && markerRejection.verdict === "REJECT") {
+      if ((beginnerChart || eagleScoutLayers.reject) && markerRejection.verdict === "REJECT") {
         parts.push(chartMarkerBadge(xFor(Math.max(1, shown.length - 3)), yFor(shown.at(-1).close) + 28, "REJECT", "#FF4D4D", "#FFD6D6", "reject"));
       }
-      if (eagleScoutLayers.graveyard && signalGraveyardItems().some(item => item.symbol === activeChartSymbol())) {
+      if (!beginnerChart && eagleScoutLayers.graveyard && signalGraveyardItems().some(item => item.symbol === activeChartSymbol())) {
         const graveIndex = Math.max(1, shown.length - 9);
         parts.push(chartMarkerBadge(xFor(graveIndex), yFor(shown[graveIndex].low) + 22, "GRAVEYARD", "#FF4D4D", "#B8C2CC", "graveyard"));
       }
-      if (eagleScoutLayers.replay && tradeReplayState.chartLinked) {
+      if ((beginnerChart || eagleScoutLayers.replay) && tradeReplayState.chartLinked) {
         const replayIndex = Math.max(0, Math.min(shown.length - 1, tradeReplayState.index));
         parts.push(chartMarkerBadge(xFor(replayIndex), yFor(shown[replayIndex].close), "REPLAY", "#B8C2CC", "#FFFFFF", "replay"));
       }
+      if (beginnerChart) {
+        const journalIndex = Math.max(1, shown.length - 4);
+        const lessonIndex = Math.max(1, shown.length - 2);
+        parts.push(chartMarkerBadge(xFor(journalIndex), yFor(shown[journalIndex].low) + 22, "JOURNAL POINT", "#FBBF24", "#FEF3C7", "journal"));
+        parts.push(chartMarkerBadge(xFor(lessonIndex), yFor(shown[lessonIndex].close) - 32, "LESSON", "#A5B4FC", "#EEF2FF", "replay"));
+      }
 
-      if (eagleScoutLayers.levels) {
+      if (eagleScoutLayers.levels || beginnerChart) {
         [
           { label: "ENTRY", value: data.price, color: "#00E5FF" },
           { label: "TARGET", value: data.target, color: "#22FF88" },
@@ -6363,6 +6714,10 @@
       ctx.restore();
     }
 
+    function isBeginnerLaunchChart() {
+      return document.body.dataset.launchMode === "true" && document.body.dataset.advancedMode !== "true";
+    }
+
     function drawChart() {
       renderChartHud();
       if (renderProfessionalChart()) return;
@@ -6385,11 +6740,12 @@
       const indicatorValues = indicatorSeriesFor(indicatorSource);
       const visibleIndicators = Object.fromEntries(Object.entries(indicatorValues).map(([key, values]) => [key, values.slice(sourceStart, sourceStart + rawShown.length)]));
       const stop = getStopPrice(data);
+      const beginnerChart = isBeginnerLaunchChart();
       const indicatorLevels = [
-        ...(eagleScoutLayers.ema9 ? visibleIndicators.ema9.filter(Number.isFinite) : []),
-        ...(eagleScoutLayers.ema21 ? visibleIndicators.ema21.filter(Number.isFinite) : []),
-        ...(eagleScoutLayers.sma50 ? visibleIndicators.sma50.filter(Number.isFinite) : []),
-        ...(eagleScoutLayers.bollinger ? visibleIndicators.bollinger.flatMap(band => band ? [band.upper, band.lower] : []) : [])
+        ...(!beginnerChart && eagleScoutLayers.ema9 ? visibleIndicators.ema9.filter(Number.isFinite) : []),
+        ...(!beginnerChart && eagleScoutLayers.ema21 ? visibleIndicators.ema21.filter(Number.isFinite) : []),
+        ...(!beginnerChart && eagleScoutLayers.sma50 ? visibleIndicators.sma50.filter(Number.isFinite) : []),
+        ...(!beginnerChart && eagleScoutLayers.bollinger ? visibleIndicators.bollinger.flatMap(band => band ? [band.upper, band.lower] : []) : [])
       ];
       const levels = [data.price, data.target, stop, averageClose, ...indicatorLevels];
       const max = Math.max(...shown.map(c => c.high), ...levels);
@@ -6446,7 +6802,7 @@
         const volumeHeight = ((candle.volume || 1) / maxVolume) * volumeH;
 
         ctx.shadowBlur = 0;
-        if (eagleScoutLayers.volume) {
+        if (!beginnerChart && eagleScoutLayers.volume) {
           ctx.fillStyle = rising ? "rgba(34,255,136,.14)" : "rgba(255,77,77,.14)";
           ctx.fillRect(x - bodyW / 2, volumeTop + volumeH - volumeHeight, bodyW, volumeHeight);
         }
@@ -6479,22 +6835,22 @@
       });
       ctx.shadowBlur = 0;
 
-      drawCanvasIndicator(eagleScoutLayers.ema9 ? visibleIndicators.ema9 : [], xFor, yFor, "#00E5FF");
-      drawCanvasIndicator(eagleScoutLayers.ema21 ? visibleIndicators.ema21 : [], xFor, yFor, "#1E5EFF");
-      drawCanvasIndicator(eagleScoutLayers.sma50 ? visibleIndicators.sma50 : [], xFor, yFor, "#B8C2CC", [6, 4]);
-      if (eagleScoutLayers.bollinger) {
+      drawCanvasIndicator(!beginnerChart && eagleScoutLayers.ema9 ? visibleIndicators.ema9 : [], xFor, yFor, "#00E5FF");
+      drawCanvasIndicator(!beginnerChart && eagleScoutLayers.ema21 ? visibleIndicators.ema21 : [], xFor, yFor, "#1E5EFF");
+      drawCanvasIndicator(!beginnerChart && eagleScoutLayers.sma50 ? visibleIndicators.sma50 : [], xFor, yFor, "#B8C2CC", [6, 4]);
+      if (!beginnerChart && eagleScoutLayers.bollinger) {
         drawCanvasIndicator(visibleIndicators.bollinger.map(band => band?.upper ?? null), xFor, yFor, "rgba(184,194,204,.78)", [4, 5]);
         drawCanvasIndicator(visibleIndicators.bollinger.map(band => band?.lower ?? null), xFor, yFor, "rgba(184,194,204,.78)", [4, 5]);
       }
 
-      if (eagleScoutLayers.vwap) drawLevel(yFor, averageClose, "VWAP", "rgba(184,194,204,.92)", width, pad);
-      if (eagleScoutLayers.levels) {
+      if (!beginnerChart && eagleScoutLayers.vwap) drawLevel(yFor, averageClose, "VWAP", "rgba(184,194,204,.92)", width, pad);
+      if (eagleScoutLayers.levels || beginnerChart) {
         drawLevel(yFor, data.price, "ENTRY", "rgba(0,229,255,.92)", width, pad);
         drawLevel(yFor, data.target, "TARGET", "rgba(34,255,136,.92)", width, pad);
         drawLevel(yFor, stop, "STOP", "rgba(255,77,77,.92)", width, pad);
       }
 
-      if (eagleScoutLayers.lightning) {
+      if (!beginnerChart && eagleScoutLayers.lightning) {
         const markerIndex = Math.max(1, shown.length - 7);
         const markerX = pad.left + gap * markerIndex + gap / 2;
         const markerY = yFor(shown[markerIndex].close);
@@ -9240,13 +9596,13 @@
       if (action === "Confirm") {
         return {
           ...plan,
-          primaryLabel: "Paper Trade",
+          primaryLabel: "Demo Trade",
           primaryIcon: "fa-paper-plane",
           primaryTone: "emerald",
           primaryAction: "paper",
           journalLabel: "Journal Plan",
           journalOutcome: "Planned",
-          journalToast: "Plan journal prefilled from Eagle Scout",
+          journalToast: "Plan journal prefilled from the setup coach",
           journalNote: `${explanation.title}: Confirm candidate. ${explanation.why} Risk zone: ${explanation.riskZone} Target zone: ${explanation.targetZone}`,
           journalTags: ["Eagle Scout", "Confirm", "Paper Plan"],
           paperDisabled: false
@@ -9263,7 +9619,7 @@
           replayLabel: hasReplay ? "Study Failure" : "Replay Later",
           journalLabel: "Journal Skip",
           journalOutcome: "Skipped",
-          journalToast: "Skip journal prefilled from Eagle Scout",
+          journalToast: "Skip journal prefilled from the setup coach",
           journalNote: `${explanation.title}: Rejected. ${explanation.why} Failed checks: ${explanation.failed.join("; ")}.`,
           journalTags: ["Eagle Scout", "Rejected", "Skipped"]
         };
@@ -9292,7 +9648,7 @@
         primaryAction: "journal",
         journalLabel: "Journal Watch",
         journalOutcome: "Skipped",
-        journalToast: "Watchlist journal prefilled from Eagle Scout",
+        journalToast: "Wait journal prefilled from the setup coach",
         journalNote: `${explanation.title}: Wait. ${explanation.why} Recheck after cleaner confirmation.`,
         journalTags: ["Eagle Scout", "Wait", "Skipped", "Watchlist"]
       };
@@ -9331,15 +9687,15 @@
         journal.dataset.outcome = plan.journalOutcome;
       }
       if (launchSummary) {
-        launchSummary.textContent = `${explanation?.symbol || currentSymbol}: ${explanation?.suggestedAction || "Wait"} read. Choose Paper Trade, Wait, or Reject to finish this Signal Story.`;
+        launchSummary.textContent = `${explanation?.symbol || currentSymbol}: ${explanation?.suggestedAction || "Wait"} read. Choose demo trade, wait, or reject to finish this story.`;
       }
       if (launchCoreVerdict) {
         launchCoreVerdict.textContent = `${explanation?.symbol || currentSymbol}: ${explanation?.suggestedAction || "Wait"}`;
       }
       if (launchCoreRule) {
         launchCoreRule.textContent = plan.primaryAction === "paper"
-          ? "Demo paper trade is allowed. Journal the plan next."
-          : `${plan.primaryLabel} is safer. Journal it, then replay.`;
+          ? "Clear setup. Demo trade, then journal."
+          : "Not clear. Wait or reject, then journal.";
       }
     }
 
@@ -12073,13 +12429,13 @@
       document.getElementById("signalReplayScore").textContent = "--";
       document.getElementById("signalReplayPredicted").textContent = "--";
       document.getElementById("signalReplayActual").textContent = "--";
-      document.getElementById("signalReplayMarket").textContent = "No replay history yet. Use demo money or journal a Wait/Reject decision, then STRIKEPULSE can turn it into the first lesson.";
+      document.getElementById("signalReplayMarket").textContent = "No replay yet. Journal a wait, reject, or demo decision to create the first lesson.";
       document.getElementById("signalReplayIndicators").innerHTML = "";
-      document.getElementById("signalReplayCompare").textContent = "Replay is the corrective loop: it shows what confirmed, what failed, and what the next decision should avoid.";
+      document.getElementById("signalReplayCompare").textContent = "Replay shows what to repeat and what to avoid next time.";
       const pulseTitle = document.getElementById("signalReplayPulseTitle");
       const pulseAction = document.getElementById("signalReplayPulseAction");
-      if (pulseTitle) pulseTitle.textContent = "No replayable signals yet";
-      if (pulseAction) pulseAction.textContent = "Use demo money or journal a skipped trade to unlock the first lesson.";
+      if (pulseTitle) pulseTitle.textContent = "No saved decision yet";
+      if (pulseAction) pulseAction.textContent = "Journal one decision to unlock the first lesson.";
       resetTradeReplay();
       renderSignalStoryStatus();
     }
@@ -12584,7 +12940,7 @@
         list.innerHTML = `
           <div class="rounded-lg border border-cyan-300/20 bg-cyan-300/10 p-3 text-sm text-cyan-50/80">
             <p class="font-black text-cyan-100">No journal memory yet</p>
-            <p class="mt-1 text-xs leading-relaxed">Save one planned, skipped, winning, or losing decision. That one note starts Proof Engine, Replay, Trade DNA, and Pilot Status learning.</p>
+            <p class="mt-1 text-xs leading-relaxed">Save one decision. That note starts the lesson.</p>
           </div>
         `;
         return;
@@ -12686,7 +13042,7 @@
       if (replayMatch && completedOutcome) {
         showNeutralToast(rawNote !== redactedNote ? "Journal saved with personal info redacted. Replay is loaded." : `${entry.symbol} journal saved. Replay loaded for the lesson.`);
       } else if (replayMatch) {
-        showNeutralToast(rawNote !== redactedNote ? "Journal saved with personal info redacted. Trade DNA refreshed." : `${entry.symbol} journal saved. Trade DNA refreshed with ${dna.sampleSize} learning samples.`);
+        showNeutralToast(rawNote !== redactedNote ? "Journal saved with personal info redacted. Pattern refreshed." : `${entry.symbol} journal saved. Pattern refreshed with ${dna.sampleSize} learning samples.`);
       } else {
         showNeutralToast(rawNote !== redactedNote ? "Journal saved with personal info redacted" : `${entry.symbol} journal note saved`);
       }
@@ -13511,17 +13867,24 @@
     canvas.addEventListener("touchend", () => {
       chartTouchDistance = null;
     });
-    document.querySelectorAll(".range").forEach(button => {
+    function syncRangeButtons() {
+      document.querySelectorAll(".range").forEach(item => {
+        const active = item.dataset.range === activeRange;
+        item.className = `range h-12 rounded-lg border px-4 text-sm font-black ${active ? "border-cyan-500 bg-cyan-500/15 text-cyan-200" : "border-zinc-700 bg-zinc-900 text-zinc-300"}`;
+      });
+      document.querySelectorAll(".launch-range").forEach(item => {
+        item.classList.toggle("is-active", item.dataset.range === activeRange);
+      });
+    }
+
+    document.querySelectorAll(".range, .launch-range").forEach(button => {
       button.addEventListener("click", () => {
         activeRange = button.dataset.range;
         zoomLevel = 1;
         chartPanOffset = 0;
         renderChartHud();
         syncScreenshotContext();
-        document.querySelectorAll(".range").forEach(item => {
-          const active = item === button;
-          item.className = `range h-12 rounded-lg border px-4 text-sm font-black ${active ? "border-cyan-500 bg-cyan-500/15 text-cyan-200" : "border-zinc-700 bg-zinc-900 text-zinc-300"}`;
-        });
+        syncRangeButtons();
         setSignal(currentSymbol, false);
       });
     });
@@ -13551,8 +13914,8 @@
         || window.navigator.standalone === true;
     }
 
-    function focusMissionBriefingFirstScreen() {
-      if (window.location.hash) return;
+    function focusMissionBriefingFirstScreen({ force = false } = {}) {
+      if (window.location.hash && !force) return;
       const mission = document.getElementById("launchCoreMission") || document.getElementById("eagleCommandCenter");
       if (!mission) return;
       requestAnimationFrame(() => {
@@ -13591,6 +13954,8 @@
     renderFeedbackCenter();
     renderQuickFeedbackButtons();
     renderEagleScoutCommandCenter();
+    syncRangeButtons();
+    initializeFirstUseCoach();
     focusMissionBriefingFirstScreen();
     registerStrikepulsePwa();
     initializeSupabaseAuth();

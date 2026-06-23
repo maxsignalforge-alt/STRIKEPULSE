@@ -179,7 +179,7 @@ import { symbols, marketContext } from './data.js';
       { id: "ticket", label: "Open Signal Ticket", detail: "Use the Quality Gate, rejection logic, Eagle Score, and Lightning readout.", target: "qualityGate", next: "Review the Signal Ticket before making any paper decision." },
       { id: "paper", label: "Demo paper decision", detail: "Use fake demo money, or reject/wait when blockers are present.", target: "paperTradeSignal", next: "Use demo money only if the setup clears your rules." },
       { id: "journal", label: "Journal the decision", detail: "Save why you confirmed, waited, skipped, or rejected the setup.", target: "journalNote", next: "Journal the decision so Proof Engine can learn from it." },
-      { id: "replay", label: "Replay the lesson", detail: "Review candle-by-candle proof after a journal or demo outcome exists.", target: "signalReplaySelect", next: "Replay the saved signal, then let Trade DNA store the lesson." }
+      { id: "replay", label: "Replay the lesson", detail: "Review what happened after a journal or demo outcome exists.", target: "signalReplaySelect", next: "Replay the saved decision, then store the lesson." }
     ];
 
     function money(value) { return "$" + value.toFixed(2); }
@@ -708,6 +708,41 @@ import { symbols, marketContext } from './data.js';
       showNeutralToast("Preferences saved");
     }
 
+    function persistCoachPreferences() {
+      localStorage.setItem("strikepulsePreferences", JSON.stringify(userPreferences));
+      renderPreferences();
+      applyPreferences();
+    }
+
+    function selectedCoachValue(name, fallback) {
+      return document.querySelector(`.coach-choice.is-selected[data-coach-${name}]`)?.dataset[`coach${name[0].toUpperCase()}${name.slice(1)}`] || fallback;
+    }
+
+    function initializeFirstUseCoach() {
+      const coach = document.getElementById("firstUseCoach");
+      if (!coach) return;
+      coach.querySelectorAll(".coach-choice").forEach(button => {
+        button.addEventListener("click", () => {
+          const group = button.dataset.coachStyle ? "coachStyle" : "coachDepth";
+          coach.querySelectorAll(`[data-${group.replace(/[A-Z]/g, match => `-${match.toLowerCase()}`)}]`).forEach(item => item.classList.remove("is-selected"));
+          button.classList.add("is-selected");
+        });
+      });
+      document.getElementById("firstUseStart")?.addEventListener("click", () => {
+        userPreferences.style = selectedCoachValue("style", userPreferences.style || "scalp");
+        userPreferences.risk = userPreferences.risk || "100";
+        userPreferences.onboarded = true;
+        localStorage.setItem("strikepulseAnalysisDepth", selectedCoachValue("depth", "beginner"));
+        persistCoachPreferences();
+        coach.classList.add("hidden");
+        focusMissionBriefingFirstScreen({ force: true });
+        showNeutralToast("Today's setup is ready");
+      });
+      if (!userPreferences.onboarded) {
+        coach.classList.remove("hidden");
+      }
+    }
+
     function updateDataHealth(started, ok) {
       dataHealth.provider = dataAdapter.name;
       dataHealth.latency = Math.max(1, Math.round(performance.now() - started));
@@ -995,7 +1030,7 @@ import { symbols, marketContext } from './data.js';
         return {
           signalId: activeSignalContext.signalId,
           status: "Replay Reviewed",
-          next: "Open Trade DNA to confirm what STRIKEPULSE learned.",
+          next: "Open Your Trading Pattern to confirm the lesson.",
           tone: "indigo"
         };
       }
@@ -1010,7 +1045,7 @@ import { symbols, marketContext } from './data.js';
       if (story?.paperTradeOpened) {
         return {
           signalId: activeSignalContext.signalId,
-          status: "Demo Paper Trade Attached",
+          status: "Demo Trade Attached",
           next: "Close or journal the demo decision so STRIKEPULSE can learn.",
           tone: "amber"
         };
@@ -1025,7 +1060,7 @@ import { symbols, marketContext } from './data.js';
               : "Journal the wait decision. Waiting is a completed decision.";
         return {
           signalId: activeSignalContext.signalId,
-          status: "Eagle Scout Reviewed",
+          status: "Setup Reviewed",
           next,
           tone: action === "Confirm" ? "emerald" : action === "Reject" ? "rose" : action === "Replay" ? "indigo" : "amber"
         };
@@ -1034,7 +1069,7 @@ import { symbols, marketContext } from './data.js';
         return {
           signalId: activeSignalContext.signalId,
           status: "Mission Briefed",
-          next: "Open Eagle Scout to choose Confirm, Wait, Reject, or Replay First.",
+          next: "Open the setup coach to choose demo trade, wait, reject, or replay first.",
           tone: "cyan"
         };
       }
@@ -1099,7 +1134,7 @@ import { symbols, marketContext } from './data.js';
       trust.className = `w-fit rounded-full border bg-zinc-950/70 px-3 py-1 text-xs font-black ${readout.tone === "emerald" ? "border-emerald-300/30 text-emerald-100" : readout.tone === "rose" ? "border-rose-300/30 text-rose-100" : readout.tone === "indigo" ? "border-indigo-300/30 text-indigo-100" : "border-amber-300/30 text-amber-100"}`;
       const loopSteps = [
         { label: "Mission", value: `${payload.weather?.label || getMarketWeather(currentSymbol).label} weather`, target: "dailyCommandCenter", active: true },
-        { label: "Eagle Scout", value: `${gate.verdict} · ${lightning.verdict.replace("⚡ ", "")}`, target: "eagleScoutExplainPanel", active: ["Confirm", "Wait"].includes(readout.verdict) },
+        { label: "Setup Coach", value: `${gate.verdict} · ${lightning.verdict.replace("⚡ ", "")}`, target: "eagleScoutExplainPanel", active: ["Confirm", "Wait"].includes(readout.verdict) },
         { label: "Decision", value: readout.verdict, target: readout.verdict === "Reject" ? "journalNote" : "paperTradeSignal", active: true },
         { label: "Learn", value: readout.verdict === "Replay First" ? "Replay now" : "Journal, then replay", target: readout.verdict === "Replay First" ? "signalReplaySelect" : "journalNote", active: true }
       ];
@@ -2374,8 +2409,9 @@ import { symbols, marketContext } from './data.js';
       const tone = chartConfidenceTone(data.confidence || 0);
       const bullish = data.type === "Bullish";
       const parts = [];
+      const beginnerChart = isBeginnerLaunchChart();
 
-      if (eagleScoutLayers.heatmap) {
+      if (!beginnerChart && eagleScoutLayers.heatmap) {
         const bands = 8;
         for (let index = 0; index < bands; index += 1) {
           const confidenceRamp = ((index + 1) / bands) * ((data.confidence || 0) / 100);
@@ -2388,27 +2424,27 @@ import { symbols, marketContext } from './data.js';
         if (!path) return;
         parts.push(`<path d="${path}" fill="none" stroke="${color}" stroke-opacity="${opacity}" stroke-width="${width}" ${dash ? `stroke-dasharray="${dash}"` : ""}></path>`);
       };
-      addPath(eagleScoutLayers.ema9 ? svgLinePath(visibleIndicators.ema9, xFor, yFor) : "", "#00E5FF", 1.8, .92);
-      addPath(eagleScoutLayers.ema21 ? svgLinePath(visibleIndicators.ema21, xFor, yFor) : "", "#1E5EFF", 1.8, .92);
-      addPath(eagleScoutLayers.sma50 ? svgLinePath(visibleIndicators.sma50, xFor, yFor) : "", "#B8C2CC", 1.8, .86, "6 4");
-      if (eagleScoutLayers.bollinger) {
+      addPath(!beginnerChart && eagleScoutLayers.ema9 ? svgLinePath(visibleIndicators.ema9, xFor, yFor) : "", "#00E5FF", 1.8, .92);
+      addPath(!beginnerChart && eagleScoutLayers.ema21 ? svgLinePath(visibleIndicators.ema21, xFor, yFor) : "", "#1E5EFF", 1.8, .92);
+      addPath(!beginnerChart && eagleScoutLayers.sma50 ? svgLinePath(visibleIndicators.sma50, xFor, yFor) : "", "#B8C2CC", 1.8, .86, "6 4");
+      if (!beginnerChart && eagleScoutLayers.bollinger) {
         addPath(svgBandPath(visibleIndicators.bollinger, xFor, yFor, "upper"), "#B8C2CC", 1.2, .62, "4 5");
         addPath(svgBandPath(visibleIndicators.bollinger, xFor, yFor, "lower"), "#B8C2CC", 1.2, .62, "4 5");
       }
 
-      if (eagleScoutLayers.zones) {
+      if (eagleScoutLayers.zones || beginnerChart) {
         const support = bullish ? Math.min(data.price, averageClose, ...shown.slice(-12).map(candle => candle.low)) : data.target;
         const resistance = bullish ? data.target : Math.max(data.price, averageClose, ...shown.slice(-12).map(candle => candle.high));
         const zoneHeight = Math.max(16, plotH * .045);
         const supportY = Math.max(pad.top, Math.min(pad.top + plotH - zoneHeight, yFor(support) - zoneHeight / 2));
         const resistanceY = Math.max(pad.top, Math.min(pad.top + plotH - zoneHeight, yFor(resistance) - zoneHeight / 2));
-        parts.push(`<rect x="${pad.left}" y="${supportY}" width="${plotW}" height="${zoneHeight}" rx="6" fill="#22FF88" opacity=".10" stroke="#22FF88" stroke-opacity=".34" stroke-dasharray="5 5"></rect>`);
-        parts.push(`<text x="${pad.left + 10}" y="${supportY + zoneHeight - 5}" fill="#B7FFD5" font-size="10" font-family="IBM Plex Mono, Consolas, monospace" font-weight="800">SUPPORT ${priceLabel(support)}</text>`);
-        parts.push(`<rect x="${pad.left}" y="${resistanceY}" width="${plotW}" height="${zoneHeight}" rx="6" fill="#B8C2CC" opacity=".10" stroke="#B8C2CC" stroke-opacity=".36" stroke-dasharray="5 5"></rect>`);
-        parts.push(`<text x="${pad.left + 10}" y="${resistanceY + zoneHeight - 5}" fill="#D8E0E8" font-size="10" font-family="IBM Plex Mono, Consolas, monospace" font-weight="800">RESISTANCE ${priceLabel(resistance)}</text>`);
+        parts.push(`<rect x="${pad.left}" y="${supportY}" width="${plotW}" height="${zoneHeight}" rx="6" fill="#00E5FF" opacity=".10" stroke="#00E5FF" stroke-opacity=".38" stroke-dasharray="5 5"></rect>`);
+        parts.push(`<text x="${pad.left + 10}" y="${supportY + zoneHeight - 5}" fill="#CFFAFE" font-size="10" font-family="IBM Plex Mono, Consolas, monospace" font-weight="800">SETUP ZONE ${priceLabel(support)}</text>`);
+        parts.push(`<rect x="${pad.left}" y="${resistanceY}" width="${plotW}" height="${zoneHeight}" rx="6" fill="#FF4D4D" opacity=".10" stroke="#FF4D4D" stroke-opacity=".36" stroke-dasharray="5 5"></rect>`);
+        parts.push(`<text x="${pad.left + 10}" y="${resistanceY + zoneHeight - 5}" fill="#FFD6D6" font-size="10" font-family="IBM Plex Mono, Consolas, monospace" font-weight="800">RISK ZONE ${priceLabel(resistance)}</text>`);
       }
 
-      if (eagleScoutLayers.lightning) {
+      if (!beginnerChart && eagleScoutLayers.lightning) {
         const gate = getQualityGate(data);
         const rejection = evaluateTradeRejection(data, gate, activeChartSymbol());
         const lightning = tradeReplayState.chartLinked
@@ -2431,22 +2467,28 @@ import { symbols, marketContext } from './data.js';
       const markerGate = getQualityGate(data);
       const markerRejection = evaluateTradeRejection(data, markerGate, activeChartSymbol());
       const markerIndex = Math.max(1, shown.length - 5);
-      if (eagleScoutLayers.aPlus && data.confidence >= 85 && markerGate.verdict !== "FAIL") {
-        parts.push(chartMarkerBadge(xFor(markerIndex), yFor(shown[markerIndex].high) - 18, "A+ SETUP", "#22FF88", "#B7FFD5", "aPlus"));
+      if ((beginnerChart || eagleScoutLayers.aPlus) && data.confidence >= 85 && markerGate.verdict !== "FAIL") {
+        parts.push(chartMarkerBadge(xFor(markerIndex), yFor(shown[markerIndex].high) - 18, beginnerChart ? "DECISION POINT" : "A+ SETUP", "#22FF88", "#B7FFD5", "aPlus"));
       }
-      if (eagleScoutLayers.reject && markerRejection.verdict === "REJECT") {
+      if ((beginnerChart || eagleScoutLayers.reject) && markerRejection.verdict === "REJECT") {
         parts.push(chartMarkerBadge(xFor(Math.max(1, shown.length - 3)), yFor(shown.at(-1).close) + 28, "REJECT", "#FF4D4D", "#FFD6D6", "reject"));
       }
-      if (eagleScoutLayers.graveyard && signalGraveyardItems().some(item => item.symbol === activeChartSymbol())) {
+      if (!beginnerChart && eagleScoutLayers.graveyard && signalGraveyardItems().some(item => item.symbol === activeChartSymbol())) {
         const graveIndex = Math.max(1, shown.length - 9);
         parts.push(chartMarkerBadge(xFor(graveIndex), yFor(shown[graveIndex].low) + 22, "GRAVEYARD", "#FF4D4D", "#B8C2CC", "graveyard"));
       }
-      if (eagleScoutLayers.replay && tradeReplayState.chartLinked) {
+      if ((beginnerChart || eagleScoutLayers.replay) && tradeReplayState.chartLinked) {
         const replayIndex = Math.max(0, Math.min(shown.length - 1, tradeReplayState.index));
         parts.push(chartMarkerBadge(xFor(replayIndex), yFor(shown[replayIndex].close), "REPLAY", "#B8C2CC", "#FFFFFF", "replay"));
       }
+      if (beginnerChart) {
+        const journalIndex = Math.max(1, shown.length - 4);
+        const lessonIndex = Math.max(1, shown.length - 2);
+        parts.push(chartMarkerBadge(xFor(journalIndex), yFor(shown[journalIndex].low) + 22, "JOURNAL POINT", "#FBBF24", "#FEF3C7", "journal"));
+        parts.push(chartMarkerBadge(xFor(lessonIndex), yFor(shown[lessonIndex].close) - 32, "LESSON", "#A5B4FC", "#EEF2FF", "replay"));
+      }
 
-      if (eagleScoutLayers.levels) {
+      if (eagleScoutLayers.levels || beginnerChart) {
         [
           { label: "ENTRY", value: data.price, color: "#00E5FF" },
           { label: "TARGET", value: data.target, color: "#22FF88" },
@@ -2500,6 +2542,10 @@ import { symbols, marketContext } from './data.js';
       ctx.restore();
     }
 
+    function isBeginnerLaunchChart() {
+      return document.body.dataset.launchMode === "true" && document.body.dataset.advancedMode !== "true";
+    }
+
     function drawChart() {
       renderChartHud();
       if (renderProfessionalChart()) return;
@@ -2522,11 +2568,12 @@ import { symbols, marketContext } from './data.js';
       const indicatorValues = indicatorSeriesFor(indicatorSource);
       const visibleIndicators = Object.fromEntries(Object.entries(indicatorValues).map(([key, values]) => [key, values.slice(sourceStart, sourceStart + rawShown.length)]));
       const stop = getStopPrice(data);
+      const beginnerChart = isBeginnerLaunchChart();
       const indicatorLevels = [
-        ...(eagleScoutLayers.ema9 ? visibleIndicators.ema9.filter(Number.isFinite) : []),
-        ...(eagleScoutLayers.ema21 ? visibleIndicators.ema21.filter(Number.isFinite) : []),
-        ...(eagleScoutLayers.sma50 ? visibleIndicators.sma50.filter(Number.isFinite) : []),
-        ...(eagleScoutLayers.bollinger ? visibleIndicators.bollinger.flatMap(band => band ? [band.upper, band.lower] : []) : [])
+        ...(!beginnerChart && eagleScoutLayers.ema9 ? visibleIndicators.ema9.filter(Number.isFinite) : []),
+        ...(!beginnerChart && eagleScoutLayers.ema21 ? visibleIndicators.ema21.filter(Number.isFinite) : []),
+        ...(!beginnerChart && eagleScoutLayers.sma50 ? visibleIndicators.sma50.filter(Number.isFinite) : []),
+        ...(!beginnerChart && eagleScoutLayers.bollinger ? visibleIndicators.bollinger.flatMap(band => band ? [band.upper, band.lower] : []) : [])
       ];
       const levels = [data.price, data.target, stop, averageClose, ...indicatorLevels];
       const max = Math.max(...shown.map(c => c.high), ...levels);
@@ -2583,7 +2630,7 @@ import { symbols, marketContext } from './data.js';
         const volumeHeight = ((candle.volume || 1) / maxVolume) * volumeH;
 
         ctx.shadowBlur = 0;
-        if (eagleScoutLayers.volume) {
+        if (!beginnerChart && eagleScoutLayers.volume) {
           ctx.fillStyle = rising ? "rgba(34,255,136,.14)" : "rgba(255,77,77,.14)";
           ctx.fillRect(x - bodyW / 2, volumeTop + volumeH - volumeHeight, bodyW, volumeHeight);
         }
@@ -2616,22 +2663,22 @@ import { symbols, marketContext } from './data.js';
       });
       ctx.shadowBlur = 0;
 
-      drawCanvasIndicator(eagleScoutLayers.ema9 ? visibleIndicators.ema9 : [], xFor, yFor, "#00E5FF");
-      drawCanvasIndicator(eagleScoutLayers.ema21 ? visibleIndicators.ema21 : [], xFor, yFor, "#1E5EFF");
-      drawCanvasIndicator(eagleScoutLayers.sma50 ? visibleIndicators.sma50 : [], xFor, yFor, "#B8C2CC", [6, 4]);
-      if (eagleScoutLayers.bollinger) {
+      drawCanvasIndicator(!beginnerChart && eagleScoutLayers.ema9 ? visibleIndicators.ema9 : [], xFor, yFor, "#00E5FF");
+      drawCanvasIndicator(!beginnerChart && eagleScoutLayers.ema21 ? visibleIndicators.ema21 : [], xFor, yFor, "#1E5EFF");
+      drawCanvasIndicator(!beginnerChart && eagleScoutLayers.sma50 ? visibleIndicators.sma50 : [], xFor, yFor, "#B8C2CC", [6, 4]);
+      if (!beginnerChart && eagleScoutLayers.bollinger) {
         drawCanvasIndicator(visibleIndicators.bollinger.map(band => band?.upper ?? null), xFor, yFor, "rgba(184,194,204,.78)", [4, 5]);
         drawCanvasIndicator(visibleIndicators.bollinger.map(band => band?.lower ?? null), xFor, yFor, "rgba(184,194,204,.78)", [4, 5]);
       }
 
-      if (eagleScoutLayers.vwap) drawLevel(yFor, averageClose, "VWAP", "rgba(184,194,204,.92)", width, pad);
-      if (eagleScoutLayers.levels) {
+      if (!beginnerChart && eagleScoutLayers.vwap) drawLevel(yFor, averageClose, "VWAP", "rgba(184,194,204,.92)", width, pad);
+      if (eagleScoutLayers.levels || beginnerChart) {
         drawLevel(yFor, data.price, "ENTRY", "rgba(0,229,255,.92)", width, pad);
         drawLevel(yFor, data.target, "TARGET", "rgba(34,255,136,.92)", width, pad);
         drawLevel(yFor, stop, "STOP", "rgba(255,77,77,.92)", width, pad);
       }
 
-      if (eagleScoutLayers.lightning) {
+      if (!beginnerChart && eagleScoutLayers.lightning) {
         const markerIndex = Math.max(1, shown.length - 7);
         const markerX = pad.left + gap * markerIndex + gap / 2;
         const markerY = yFor(shown[markerIndex].close);
@@ -5377,13 +5424,13 @@ import { symbols, marketContext } from './data.js';
       if (action === "Confirm") {
         return {
           ...plan,
-          primaryLabel: "Paper Trade",
+          primaryLabel: "Demo Trade",
           primaryIcon: "fa-paper-plane",
           primaryTone: "emerald",
           primaryAction: "paper",
           journalLabel: "Journal Plan",
           journalOutcome: "Planned",
-          journalToast: "Plan journal prefilled from Eagle Scout",
+          journalToast: "Plan journal prefilled from the setup coach",
           journalNote: `${explanation.title}: Confirm candidate. ${explanation.why} Risk zone: ${explanation.riskZone} Target zone: ${explanation.targetZone}`,
           journalTags: ["Eagle Scout", "Confirm", "Paper Plan"],
           paperDisabled: false
@@ -5400,7 +5447,7 @@ import { symbols, marketContext } from './data.js';
           replayLabel: hasReplay ? "Study Failure" : "Replay Later",
           journalLabel: "Journal Skip",
           journalOutcome: "Skipped",
-          journalToast: "Skip journal prefilled from Eagle Scout",
+          journalToast: "Skip journal prefilled from the setup coach",
           journalNote: `${explanation.title}: Rejected. ${explanation.why} Failed checks: ${explanation.failed.join("; ")}.`,
           journalTags: ["Eagle Scout", "Rejected", "Skipped"]
         };
@@ -5429,7 +5476,7 @@ import { symbols, marketContext } from './data.js';
         primaryAction: "journal",
         journalLabel: "Journal Watch",
         journalOutcome: "Skipped",
-        journalToast: "Watchlist journal prefilled from Eagle Scout",
+        journalToast: "Wait journal prefilled from the setup coach",
         journalNote: `${explanation.title}: Wait. ${explanation.why} Recheck after cleaner confirmation.`,
         journalTags: ["Eagle Scout", "Wait", "Skipped", "Watchlist"]
       };
@@ -5468,15 +5515,15 @@ import { symbols, marketContext } from './data.js';
         journal.dataset.outcome = plan.journalOutcome;
       }
       if (launchSummary) {
-        launchSummary.textContent = `${explanation?.symbol || currentSymbol}: ${explanation?.suggestedAction || "Wait"} read. Choose Paper Trade, Wait, or Reject to finish this Signal Story.`;
+        launchSummary.textContent = `${explanation?.symbol || currentSymbol}: ${explanation?.suggestedAction || "Wait"} read. Choose demo trade, wait, or reject to finish this story.`;
       }
       if (launchCoreVerdict) {
         launchCoreVerdict.textContent = `${explanation?.symbol || currentSymbol}: ${explanation?.suggestedAction || "Wait"}`;
       }
       if (launchCoreRule) {
         launchCoreRule.textContent = plan.primaryAction === "paper"
-          ? "Demo paper trade is allowed. Journal the plan next."
-          : `${plan.primaryLabel} is safer. Journal it, then replay.`;
+          ? "Clear setup. Demo trade, then journal."
+          : "Not clear. Wait or reject, then journal.";
       }
     }
 
@@ -8210,13 +8257,13 @@ import { symbols, marketContext } from './data.js';
       document.getElementById("signalReplayScore").textContent = "--";
       document.getElementById("signalReplayPredicted").textContent = "--";
       document.getElementById("signalReplayActual").textContent = "--";
-      document.getElementById("signalReplayMarket").textContent = "No replay history yet. Use demo money or journal a Wait/Reject decision, then STRIKEPULSE can turn it into the first lesson.";
+      document.getElementById("signalReplayMarket").textContent = "No replay yet. Journal a wait, reject, or demo decision to create the first lesson.";
       document.getElementById("signalReplayIndicators").innerHTML = "";
-      document.getElementById("signalReplayCompare").textContent = "Replay is the corrective loop: it shows what confirmed, what failed, and what the next decision should avoid.";
+      document.getElementById("signalReplayCompare").textContent = "Replay shows what to repeat and what to avoid next time.";
       const pulseTitle = document.getElementById("signalReplayPulseTitle");
       const pulseAction = document.getElementById("signalReplayPulseAction");
-      if (pulseTitle) pulseTitle.textContent = "No replayable signals yet";
-      if (pulseAction) pulseAction.textContent = "Use demo money or journal a skipped trade to unlock the first lesson.";
+      if (pulseTitle) pulseTitle.textContent = "No saved decision yet";
+      if (pulseAction) pulseAction.textContent = "Journal one decision to unlock the first lesson.";
       resetTradeReplay();
       renderSignalStoryStatus();
     }
@@ -8721,7 +8768,7 @@ import { symbols, marketContext } from './data.js';
         list.innerHTML = `
           <div class="rounded-lg border border-cyan-300/20 bg-cyan-300/10 p-3 text-sm text-cyan-50/80">
             <p class="font-black text-cyan-100">No journal memory yet</p>
-            <p class="mt-1 text-xs leading-relaxed">Save one planned, skipped, winning, or losing decision. That one note starts Proof Engine, Replay, Trade DNA, and Pilot Status learning.</p>
+            <p class="mt-1 text-xs leading-relaxed">Save one decision. That note starts the lesson.</p>
           </div>
         `;
         return;
@@ -8823,7 +8870,7 @@ import { symbols, marketContext } from './data.js';
       if (replayMatch && completedOutcome) {
         showNeutralToast(rawNote !== redactedNote ? "Journal saved with personal info redacted. Replay is loaded." : `${entry.symbol} journal saved. Replay loaded for the lesson.`);
       } else if (replayMatch) {
-        showNeutralToast(rawNote !== redactedNote ? "Journal saved with personal info redacted. Trade DNA refreshed." : `${entry.symbol} journal saved. Trade DNA refreshed with ${dna.sampleSize} learning samples.`);
+        showNeutralToast(rawNote !== redactedNote ? "Journal saved with personal info redacted. Pattern refreshed." : `${entry.symbol} journal saved. Pattern refreshed with ${dna.sampleSize} learning samples.`);
       } else {
         showNeutralToast(rawNote !== redactedNote ? "Journal saved with personal info redacted" : `${entry.symbol} journal note saved`);
       }
@@ -9648,17 +9695,24 @@ import { symbols, marketContext } from './data.js';
     canvas.addEventListener("touchend", () => {
       chartTouchDistance = null;
     });
-    document.querySelectorAll(".range").forEach(button => {
+    function syncRangeButtons() {
+      document.querySelectorAll(".range").forEach(item => {
+        const active = item.dataset.range === activeRange;
+        item.className = `range h-12 rounded-lg border px-4 text-sm font-black ${active ? "border-cyan-500 bg-cyan-500/15 text-cyan-200" : "border-zinc-700 bg-zinc-900 text-zinc-300"}`;
+      });
+      document.querySelectorAll(".launch-range").forEach(item => {
+        item.classList.toggle("is-active", item.dataset.range === activeRange);
+      });
+    }
+
+    document.querySelectorAll(".range, .launch-range").forEach(button => {
       button.addEventListener("click", () => {
         activeRange = button.dataset.range;
         zoomLevel = 1;
         chartPanOffset = 0;
         renderChartHud();
         syncScreenshotContext();
-        document.querySelectorAll(".range").forEach(item => {
-          const active = item === button;
-          item.className = `range h-12 rounded-lg border px-4 text-sm font-black ${active ? "border-cyan-500 bg-cyan-500/15 text-cyan-200" : "border-zinc-700 bg-zinc-900 text-zinc-300"}`;
-        });
+        syncRangeButtons();
         setSignal(currentSymbol, false);
       });
     });
@@ -9688,8 +9742,8 @@ import { symbols, marketContext } from './data.js';
         || window.navigator.standalone === true;
     }
 
-    function focusMissionBriefingFirstScreen() {
-      if (window.location.hash) return;
+    function focusMissionBriefingFirstScreen({ force = false } = {}) {
+      if (window.location.hash && !force) return;
       const mission = document.getElementById("launchCoreMission") || document.getElementById("eagleCommandCenter");
       if (!mission) return;
       requestAnimationFrame(() => {
@@ -9728,6 +9782,8 @@ import { symbols, marketContext } from './data.js';
     renderFeedbackCenter();
     renderQuickFeedbackButtons();
     renderEagleScoutCommandCenter();
+    syncRangeButtons();
+    initializeFirstUseCoach();
     focusMissionBriefingFirstScreen();
     registerStrikepulsePwa();
     initializeSupabaseAuth();
