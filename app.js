@@ -9751,6 +9751,66 @@ import { symbols, marketContext } from './data.js';
       });
     }
 
+    function initializeSignalStoryMobileNav() {
+      const nav = document.getElementById("signalStoryBottomNav");
+      if (!nav) return;
+      const links = Array.from(nav.querySelectorAll("a[href^='#']"));
+      const targets = links
+        .map(link => ({ link, target: document.querySelector(link.getAttribute("href")) }))
+        .filter(item => item.target);
+
+      const setActive = id => {
+        links.forEach(link => {
+          link.classList.toggle("is-active", link.getAttribute("href") === `#${id}`);
+        });
+      };
+
+      links.forEach(link => {
+        link.addEventListener("click", event => {
+          const target = document.querySelector(link.getAttribute("href"));
+          if (!target) return;
+          event.preventDefault();
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+          setActive(target.id);
+          history.replaceState(null, "", link.getAttribute("href"));
+        });
+      });
+
+      const backTopSections = ["chartPanel", "journalPanel", "signalReplayPulse", "tomorrowMissionPanel"];
+      backTopSections.forEach(id => {
+        const section = document.getElementById(id);
+        if (!section || section.querySelector(".story-back-top")) return;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "story-back-top";
+        button.innerHTML = '<i class="fa-solid fa-arrow-up"></i><span>Back to Setup</span>';
+        button.addEventListener("click", () => {
+          document.getElementById("launchCoreMission")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          setActive("launchCoreMission");
+        });
+        section.appendChild(button);
+      });
+
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver(entries => {
+          const visible = entries
+            .filter(entry => entry.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+          if (visible?.target?.id) setActive(visible.target.id);
+        }, { rootMargin: "-35% 0px -45% 0px", threshold: [0.05, 0.2, 0.45, 0.7] });
+        targets.forEach(item => observer.observe(item.target));
+      } else {
+        window.addEventListener("scroll", () => {
+          const current = targets
+            .map(item => ({ id: item.target.id, distance: Math.abs(item.target.getBoundingClientRect().top - 96) }))
+            .sort((a, b) => a.distance - b.distance)[0];
+          if (current?.id) setActive(current.id);
+        }, { passive: true });
+      }
+
+      setActive((targets[0]?.target || {}).id || "launchCoreMission");
+    }
+
     function registerStrikepulsePwa() {
       if (!("serviceWorker" in navigator)) return;
       window.addEventListener("load", () => {
@@ -9783,6 +9843,7 @@ import { symbols, marketContext } from './data.js';
     renderQuickFeedbackButtons();
     renderEagleScoutCommandCenter();
     syncRangeButtons();
+    initializeSignalStoryMobileNav();
     initializeFirstUseCoach();
     focusMissionBriefingFirstScreen();
     registerStrikepulsePwa();
